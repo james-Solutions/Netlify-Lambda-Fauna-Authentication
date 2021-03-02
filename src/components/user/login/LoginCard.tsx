@@ -10,9 +10,6 @@ import {
   IonCardSubtitle,
   IonCardTitle,
   IonCardContent,
-  IonItem,
-  IonLabel,
-  IonButton,
 } from "@ionic/react";
 
 export const LoginCard: React.FC = () => {
@@ -29,7 +26,6 @@ export const LoginCard: React.FC = () => {
             <IonCardTitle>Login</IonCardTitle>
             <IonCardSubtitle>Enter Login Information:</IonCardSubtitle>
           </IonCardHeader>
-
           <IonCardContent>Placeholder for login</IonCardContent>
         </IonCard>
       </IonContent>

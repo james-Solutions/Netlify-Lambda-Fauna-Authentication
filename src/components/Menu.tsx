@@ -12,19 +12,10 @@ import {
 
 import { useLocation } from "react-router-dom";
 import {
-  archiveOutline,
-  archiveSharp,
-  bookmarkOutline,
-  heartOutline,
-  heartSharp,
-  mailOutline,
-  mailSharp,
-  paperPlaneOutline,
-  paperPlaneSharp,
-  trashOutline,
-  trashSharp,
-  warningOutline,
-  warningSharp,
+  logInOutline,
+  logInSharp,
+  personAddOutline,
+  personAddSharp,
 } from "ionicons/icons";
 import "./Menu.css";
 
@@ -39,14 +30,14 @@ const appPages: AppPage[] = [
   {
     title: "Login",
     url: "/user/login",
-    iosIcon: paperPlaneOutline,
-    mdIcon: paperPlaneSharp,
+    iosIcon: logInOutline,
+    mdIcon: logInSharp,
   },
   {
     title: "Registration",
     url: "/user/register",
-    iosIcon: mailOutline,
-    mdIcon: mailSharp,
+    iosIcon: personAddOutline,
+    mdIcon: personAddSharp,
   },
 ];
 
@@ -57,7 +48,7 @@ const Menu: React.FC = () => {
     <IonMenu contentId="main" type="overlay">
       <IonContent>
         <IonList id="inbox-list">
-          <IonListHeader>Student Schedule Planner</IonListHeader>
+          <IonListHeader>Semester Schedule Planner</IonListHeader>
           <IonNote>Welcome</IonNote>
           {appPages.map((appPage, index) => {
             return (
