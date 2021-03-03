@@ -17,6 +17,7 @@ import {
   IonListHeader,
   IonRadio,
   IonItemDivider,
+  IonToast,
 } from "@ionic/react";
 
 export const RegistrationCard: React.FC = () => {
@@ -25,15 +26,31 @@ export const RegistrationCard: React.FC = () => {
   const [password, setPassword] = useState<string>();
   const [verifyPassword, setVerifyPassword] = useState<string>();
   const [selected, setSelected] = useState<string>("Student");
+  const [inputToastError, setInputToastError] = useState(false);
+  const [showToastError, setShowToastError] = useState(false);
 
   const registrationBtnHandler = (event: Event) => {
-    // Nothing is sanitized!!!
-    console.log("-".repeat(40));
-    console.log("New User Registration Request:");
-    console.log(`Email: ${email} | Username: ${username}`);
-    console.log(`Password: ${password} | Verify: ${verifyPassword}`);
-    console.log(`Requested Access Level: ${selected}`);
-    console.log("-".repeat(40));
+    if (
+      email === undefined ||
+      email === "" ||
+      username === undefined ||
+      username === "" ||
+      password === undefined ||
+      password === "" ||
+      verifyPassword === undefined ||
+      verifyPassword === ""
+    ) {
+      setShowToastError(true);
+      setInputToastError(true);
+    } else {
+      // Nothing is sanitized!!!
+      console.log("-".repeat(40));
+      console.log("New User Registration Request:");
+      console.log(`Email: ${email} | Username: ${username}`);
+      console.log(`Password: ${password} | Verify: ${verifyPassword}`);
+      console.log(`Requested Access Level: ${selected}`);
+      console.log("-".repeat(40));
+    }
   };
 
   return (
@@ -56,7 +73,9 @@ export const RegistrationCard: React.FC = () => {
                 value={email}
                 onIonChange={(event) => setEmail(event.detail.value!)}
                 type="email"
+                pattern="email"
                 autocomplete="email"
+                required={true}
               ></IonInput>
             </IonItem>
             <IonItem>
@@ -64,6 +83,7 @@ export const RegistrationCard: React.FC = () => {
               <IonInput
                 value={username}
                 onIonChange={(event) => setUsername(event.detail.value!)}
+                required={true}
               ></IonInput>
             </IonItem>
             <IonItem>
@@ -72,7 +92,9 @@ export const RegistrationCard: React.FC = () => {
                 value={password}
                 onIonChange={(event) => setPassword(event.detail.value!)}
                 type="password"
+                pattern="password"
                 autocomplete="new-password"
+                required={true}
               ></IonInput>
             </IonItem>
             <IonItem>
@@ -81,7 +103,9 @@ export const RegistrationCard: React.FC = () => {
                 value={verifyPassword}
                 onIonChange={(event) => setVerifyPassword(event.detail.value!)}
                 type="password"
+                pattern="password"
                 autocomplete="new-password"
+                required={true}
               ></IonInput>
             </IonItem>
             {/* End Basic User Information */}
@@ -125,6 +149,18 @@ export const RegistrationCard: React.FC = () => {
             {/* End Content */}
           </IonCardContent>
         </IonCard>
+        {showToastError === false ? (
+          <div></div>
+        ) : (
+          <div>
+            <IonToast
+              isOpen={inputToastError}
+              onDidDismiss={() => setShowToastError(false)}
+              message="Please enter all information."
+              duration={2500}
+            />
+          </div>
+        )}
       </IonContent>
     </IonPage>
   );
