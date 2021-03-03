@@ -27,7 +27,6 @@ export const RegistrationCard: React.FC = () => {
   const [verifyPassword, setVerifyPassword] = useState<string>();
   const [selected, setSelected] = useState<string>("Student");
   const [inputToastError, setInputToastError] = useState(false);
-  const [showToastError, setShowToastError] = useState(false);
 
   const registrationBtnHandler = (event: Event) => {
     if (
@@ -40,10 +39,11 @@ export const RegistrationCard: React.FC = () => {
       verifyPassword === undefined ||
       verifyPassword === ""
     ) {
-      setShowToastError(true);
+      // setShowToastError(true);
       setInputToastError(true);
     } else {
       // Nothing is sanitized!!!
+      setInputToastError(false);
       console.log("-".repeat(40));
       console.log("New User Registration Request:");
       console.log(`Email: ${email} | Username: ${username}`);
@@ -149,18 +149,12 @@ export const RegistrationCard: React.FC = () => {
             {/* End Content */}
           </IonCardContent>
         </IonCard>
-        {showToastError === false ? (
-          <div></div>
-        ) : (
-          <div>
-            <IonToast
-              isOpen={inputToastError}
-              onDidDismiss={() => setShowToastError(false)}
-              message="Please enter all information."
-              duration={2500}
-            />
-          </div>
-        )}
+        <IonToast
+          isOpen={inputToastError}
+          onDidDismiss={() => setInputToastError(false)}
+          message="Please enter all information."
+          duration={2500}
+        />
       </IonContent>
     </IonPage>
   );
