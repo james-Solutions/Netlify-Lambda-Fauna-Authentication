@@ -66,14 +66,12 @@ export const RegistrationCard: React.FC = () => {
       // Everything is sanitized!!!
       setInputToastError(false);
       dispatch(
-        sendRegistrationAsync(
-          sendRegistration({
-            username: username,
-            email: email,
-            password: password,
-            accessLevel: selected,
-          })
-        )
+        sendRegistrationAsync({
+          username: username,
+          email: email,
+          password: password,
+          accessLevel: selected,
+        })
       );
       setRegistrationSuccessfulToast(true);
       history.push("/user/login");
