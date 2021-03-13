@@ -21,7 +21,10 @@ import {
   IonToast,
 } from "@ionic/react";
 import { useSelector, useDispatch } from "react-redux";
-import { sendRegistration } from "../../../redux/slices/serverSlice";
+import {
+  sendRegistration,
+  sendRegistrationAsync,
+} from "../../../redux/slices/serverSlice";
 
 export const RegistrationCard: React.FC = () => {
   const history = useHistory();
@@ -62,12 +65,16 @@ export const RegistrationCard: React.FC = () => {
     ) {
       // Everything is sanitized!!!
       setInputToastError(false);
-      console.log("-".repeat(40));
-      console.log("New User Registration Request:");
-      console.log(`Email: ${email} | Username: ${username}`);
-      console.log(`Password: ${password} | Verify: ${verifyPassword}`);
-      console.log(`Requested Access Level: ${selected}`);
-      console.log("-".repeat(40));
+      dispatch(
+        sendRegistrationAsync(
+          sendRegistration({
+            username: username,
+            email: email,
+            password: password,
+            accessLevel: selected,
+          })
+        )
+      );
       setRegistrationSuccessfulToast(true);
       history.push("/user/login");
       clearAllInput();
@@ -141,7 +148,6 @@ export const RegistrationCard: React.FC = () => {
     padding: "0.5rem",
     fontStyle: "italic",
   };
-  dispatch(sendRegistration({ user: "test", password: "test" }));
   return (
     <IonPage>
       <IonHeader>

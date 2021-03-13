@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AppThunk } from "../store/store";
 
 // Redux Slice
 const serverSlice = createSlice({
@@ -7,51 +8,9 @@ const serverSlice = createSlice({
   reducers: {
     sendRegistration: (state, action: PayloadAction<object>) => {
       const { payload } = action;
+      console.log("after sent to server");
       console.log(payload);
     },
-    // setConnected: (state, action) => {
-    //     state.isConnected = action.payload;
-    // },
-    // setUpload: (state, action) => {
-    //     state.isUpload = action.payload;
-    // },
-    // setDownload: (state, action) => {
-    //     state.isDownload = action.payload;
-    // },
-    // setIsFileInQueue: (state, action) => {
-    //     state.isFileInQueue = action.payload;
-    // },
-    // setNumFilesInQueue: (state, action) => {
-    //     state.numFilesInQueue = action.payload;
-    // },
-    // setProcessingHost: (state, action) => {
-    //     state.processingHost = action.payload;
-    // },
-    // setCurrentProcessingFile: (state, action) => {
-    //     state.currentProcessingFile = action.payload;
-    // },
-    // setCommandServerConnection: (state, action) => {
-    //     const { payload } = action;
-    //     // action payload is either connect or disconnect
-    //     if (payload.toLowerCase() === 'connect') {
-    //         commandServer.connect();
-    //         state.isConnected = true;
-    //     } else {
-    //         commandServer.disconnect();
-    //         state.isConnected = false;
-    //     }
-    // },
-    // setFileServerConnection: (state, action) => {
-    //     const { payload } = action;
-    //     // action payload is either connect or disconnect
-    //     if (payload.toLowerCase() === 'connect') {
-    //         //TODO: Do we want to keep track of file server connection status in the store?
-    //         // Currently, in `App.js` we are only updating `isConnected` for command server
-    //         fileServer.connect();
-    //     } else {
-    //         fileServer.disconnect();
-    //     }
-    // },
   },
 });
 
@@ -65,5 +24,12 @@ export const { sendRegistration } = serverSlice.actions;
 //     return { isConnected, isUpload, isDownload };
 // };
 // export const selectNumFilesInQueue = (state) => state.server.numFilesInQueue;
+
+export const sendRegistrationAsync = (user: object): AppThunk => (dispatch) => {
+  //Send server
+  console.log("Async sending to server");
+  // Once completed with success response from server
+  dispatch(sendRegistration(user));
+};
 
 export default serverSlice.reducer;
