@@ -20,10 +20,12 @@ import {
   IonItemDivider,
   IonToast,
 } from "@ionic/react";
+import { useSelector, useDispatch } from "react-redux";
+import { sendRegistration } from "../../../redux/slices/serverSlice";
 
 export const RegistrationCard: React.FC = () => {
   const history = useHistory();
-
+  const dispatch = useDispatch();
   const [email, setEmail] = useState<string>();
   const [username, setUsername] = useState<string>();
   const [password, setPassword] = useState<string>();
@@ -139,7 +141,7 @@ export const RegistrationCard: React.FC = () => {
     padding: "0.5rem",
     fontStyle: "italic",
   };
-
+  dispatch(sendRegistration({ user: "test", password: "test" }));
   return (
     <IonPage>
       <IonHeader>
