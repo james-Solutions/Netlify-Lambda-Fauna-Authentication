@@ -15,6 +15,7 @@
     "@types/react-dom": "^16.9.10",
     "@types/react-router": "^5.1.11",
     "@types/react-router-dom": "^5.1.7",
+    "faunadb": "^4.1.1",
     "ionicons": "^5.4.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -37,10 +38,23 @@
     "workbox-streams": "^5.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "start": "npm-run-all --parallel start:app start:server",
+    "start:app": "react-scripts start",
+    "start:server": "netlify-lambda serve functions -c ./webpack.config.js",
+    "prebuild": "echo 'setup faunaDB' && npm run bootstrap",
+    "build": "npm-run-all --parallel build:**",
+    "build:app": "react-scripts build",
+    "build:functions": "netlify-lambda build functions -c ./webpack.config.js"
+  },
+  "proxy": {
+    "/.netlify/functions": {
+      "target": "http://localhost:9000",
+      "pathRewrite": {
+        "^/\\.netlify/functions": ""
+      }
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -61,7 +75,10 @@
     ]
   },
   "devDependencies": {
-    "@capacitor/cli": "2.4.6"
+    "@capacitor/cli": "2.4.6",
+    "chalk": "^4.1.0",
+    "netlify-lambda": "^2.0.3",
+    "npm-run-all": "^4.1.5"
   },
   "description": "An Ionic project"
 }
