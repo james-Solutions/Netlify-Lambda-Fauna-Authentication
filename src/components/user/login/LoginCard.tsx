@@ -17,8 +17,12 @@ import {
   IonToast,
 } from "@ionic/react";
 
+import { sendLoginAsync } from "../../../redux/slices/serverSlice";
+import { useDispatch } from "react-redux";
+
 export const LoginCard: React.FC = () => {
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
@@ -41,10 +45,11 @@ export const LoginCard: React.FC = () => {
     ) {
       // Everything is sanitized!!!
       setInputToastError(false);
-      console.log("-".repeat(40));
-      console.log("User Login Request:");
-      console.log(`Email: ${email}`);
-      console.log("-".repeat(40));
+      // console.log("-".repeat(40));
+      // console.log("User Login Request:");
+      // console.log(`Email: ${email}`);
+      // console.log("-".repeat(40));
+      dispatch(sendLoginAsync({ email: email, password: password }));
       setLoginSuccessfulToast(true);
       history.push("/user/login");
       clearAllInput();
@@ -57,7 +62,6 @@ export const LoginCard: React.FC = () => {
   const emailExpress = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
   // 8 to 15 characters which contain at least one lowercase letter,
   // one uppercase letter, one numeric digit, and one special character
-  const passwordExpress = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
 
   const emailInputHandler = (inputEmail: string) => {
     setEmail(inputEmail);
@@ -72,13 +76,6 @@ export const LoginCard: React.FC = () => {
 
   const passwordInputHandler = (inputPassword: string) => {
     setPassword(inputPassword);
-    if (password !== undefined) {
-      if (passwordExpress.test(inputPassword)) {
-        setShowPasswordError(false);
-      } else {
-        setShowPasswordError(true);
-      }
-    }
   };
 
   const clearAllInput = () => {
