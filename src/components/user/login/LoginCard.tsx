@@ -32,12 +32,10 @@ export const LoginCard: React.FC = () => {
     false
   );
   const [showEmailError, setShowEmailError] = useState<boolean>(false);
-  const [showPasswordError, setShowPasswordError] = useState<boolean>(false);
 
   const loginBtnHandler = (event: Event) => {
     if (
       showEmailError === false &&
-      showPasswordError === false &&
       email !== undefined &&
       email !== "" &&
       password !== undefined &&
@@ -51,7 +49,7 @@ export const LoginCard: React.FC = () => {
       // console.log("-".repeat(40));
       dispatch(sendLoginAsync({ email: email, password: password }));
       setLoginSuccessfulToast(true);
-      history.push("/user/login");
+      history.push("/home");
       clearAllInput();
     } else {
       setInputToastError(true);
@@ -133,15 +131,6 @@ export const LoginCard: React.FC = () => {
                 required={true}
               ></IonInput>
             </IonItem>
-            {showPasswordError ? (
-              <div style={errorStyle}>
-                Invalid Password. Password must be 8 to 15 characters which
-                contain at least one lowercase letter, one uppercase letter, one
-                numeric digit, and one special character
-              </div>
-            ) : (
-              <div />
-            )}
             {/* End Login Credential User Information */}
 
             {/* Login Submit Button */}

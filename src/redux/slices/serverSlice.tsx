@@ -1,28 +1,38 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppThunk } from "../store/store";
+import { AppThunk, RootState } from "../store/store";
+
+interface User {
+  email: string;
+  password: string;
+}
 
 // Redux Slice
 const serverSlice = createSlice({
   name: "server",
-  initialState: { isAuth: false },
+  initialState: {
+    isAuth: false,
+    user: {
+      email: "",
+      username: "",
+    },
+  },
   reducers: {
     sendRegistration: (state, action: PayloadAction<object>) => {
       const { payload } = action;
       console.log("after sent to server");
       console.log(payload);
     },
-    sendLogin: (state, action: PayloadAction<object>) => {
-      console.log(state.isAuth);
-      const { payload } = action;
-      console.log("after sent to server");
-      console.log(payload);
+    loginSuccessful: (state, action: PayloadAction<User>) => {
+      const { email, password } = action.payload;
       state.isAuth = true;
+      state.user.email = email;
+      state.user.username = "James";
     },
   },
 });
 
 // Actions
-export const { sendRegistration, sendLogin } = serverSlice.actions;
+export const { sendRegistration, loginSuccessful } = serverSlice.actions;
 
 // Selectors
 // export const selectConnectionInfo = (state) => {
@@ -30,7 +40,8 @@ export const { sendRegistration, sendLogin } = serverSlice.actions;
 
 //     return { isConnected, isUpload, isDownload };
 // };
-// export const selectNumFilesInQueue = (state) => state.server.numFilesInQueue;
+export const getIsAuth = (state: RootState) => state.server.isAuth;
+export const getUser = (state: RootState) => state.server.user;
 
 export const sendRegistrationAsync = (user: object): AppThunk => (dispatch) => {
   //Send server
@@ -38,11 +49,11 @@ export const sendRegistrationAsync = (user: object): AppThunk => (dispatch) => {
   // Once completed with success response from server
   dispatch(sendRegistration(user));
 };
-export const sendLoginAsync = (user: object): AppThunk => (dispatch) => {
+export const sendLoginAsync = (user: User): AppThunk => (dispatch) => {
   //Send server
   console.log("Async sending to server");
   // Once completed with success response from server
-  dispatch(sendLogin(user));
+  dispatch(loginSuccessful({ email: user.email, password: user.password }));
 };
 
 export default serverSlice.reducer;
