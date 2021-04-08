@@ -12,18 +12,25 @@ interface LoggedInUser {
   username: string;
   hashedSecret: string;
 }
+const data = sessionStorage.getItem("user-info");
+let sessionUserInfo = null;
+if (data !== null) {
+  sessionUserInfo = JSON.parse(data);
+}
+
+const initialState = {
+  isAuth: false,
+  user: {
+    email: sessionUserInfo !== null ? sessionUserInfo.email : "",
+    username: sessionUserInfo !== null ? sessionUserInfo.username : "",
+    hashedSecret: "",
+  },
+};
 
 // Redux Slice
 const serverSlice = createSlice({
   name: "server",
-  initialState: {
-    isAuth: false,
-    user: {
-      email: "",
-      username: "",
-      hashedSecret: "",
-    },
-  },
+  initialState,
   reducers: {
     sendRegistration: (state, action: PayloadAction<object>) => {
       const { payload } = action;
@@ -36,6 +43,13 @@ const serverSlice = createSlice({
       state.user.email = email;
       state.user.username = username;
       state.user.hashedSecret = hashedSecret;
+      sessionStorage.setItem(
+        "user-info",
+        JSON.stringify({
+          email: state.user.email,
+          username: state.user.username,
+        })
+      );
     },
   },
 });

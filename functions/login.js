@@ -8,14 +8,15 @@ const headers = {
 
 exports.handler = (event, context, callback) => {
   if (event.httpMethod === "POST") {
+    const postData = JSON.parse(event.body);
     const hashedSecret = crypto
       .createHash("sha256")
-      .update("event.body.password")
+      .update(postData.email + postData.password)
       .digest("base64");
     return callback(null, {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ username: "Bob", hashedSecret }),
+      body: JSON.stringify({ username: "James", hashedSecret }),
     });
   } else {
     return callback(null, {
