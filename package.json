@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "@babel/core": "^7.13.15",
     "@capacitor/core": "2.4.6",
     "@ionic/react": "^5.5.0",
     "@ionic/react-router": "^5.5.0",
