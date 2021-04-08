@@ -2,9 +2,14 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunk, RootState } from "../store/store";
 import fetch from "cross-fetch";
 
-interface User {
+interface LoginRequestUser {
   email: string;
   password: string;
+}
+
+interface LoggedInUser {
+  email: string;
+  username: string;
 }
 
 // Redux Slice
@@ -23,11 +28,11 @@ const serverSlice = createSlice({
       console.log("after sent to server");
       console.log(payload);
     },
-    loginSuccessful: (state, action: PayloadAction<User>) => {
-      const { email, password } = action.payload;
+    loginSuccessful: (state, action: PayloadAction<LoggedInUser>) => {
+      const { email, username } = action.payload;
       state.isAuth = true;
       state.user.email = email;
-      state.user.username = "James";
+      state.user.username = username;
     },
   },
 });
@@ -45,17 +50,20 @@ export const sendRegistrationAsync = (user: object): AppThunk => (dispatch) => {
   // Once completed with success response from server
   dispatch(sendRegistration(user));
 };
-export const sendLoginAsync = (user: User): AppThunk => (dispatch) => {
+export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
+  dispatch
+) => {
   //Send server
-  console.log("Async sending to server");
   // Once completed with success response from server
-  dispatch(loginSuccessful({ email: user.email, password: user.password }));
   fetch("http://localhost:9000/login", {
     method: "GET",
   }).then(
     (res) => {
       res.json().then((json) => {
         console.log(json);
+        dispatch(
+          loginSuccessful({ email: user.email, username: json.username })
+        );
       });
     },
     (error) => {

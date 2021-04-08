@@ -6,6 +6,6 @@ exports.handler = (event, context, callback) => {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTION",
     },
-    body: JSON.stringify({ code: 1, message: "Works" }),
+    body: JSON.stringify({ username: "Bob" }),
   });
 };
