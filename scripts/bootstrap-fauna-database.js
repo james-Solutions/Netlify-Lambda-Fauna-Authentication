@@ -1,7 +1,7 @@
-import faunadb from "faunadb";
+const faunadb = require("faunadb");
 
 const q = faunadb.query;
-let client: faunadb.Client | null = null;
+let client = null;
 if (process.env.REACT_APP_FAUNA_SECRET !== undefined) {
   client = new faunadb.Client({
     secret: process.env.REACT_APP_FAUNA_SECRET,
