@@ -34,8 +34,6 @@ const serverSlice = createSlice({
   reducers: {
     sendRegistration: (state, action: PayloadAction<object>) => {
       const { payload } = action;
-      console.log("after sent to server");
-      console.log(payload);
     },
     loginSuccessful: (state, action: PayloadAction<LoggedInUser>) => {
       const { email, username, hashedSecret } = action.payload;
@@ -50,12 +48,24 @@ const serverSlice = createSlice({
           username: state.user.username,
         })
       );
+      window.location.replace("/home");
+    },
+    logOutUser: (state) => {
+      sessionStorage.clear();
+      state.isAuth = false;
+      state.user.email = "";
+      state.user.username = "";
+      state.user.hashedSecret = "";
     },
   },
 });
 
 // Actions
-export const { sendRegistration, loginSuccessful } = serverSlice.actions;
+export const {
+  sendRegistration,
+  loginSuccessful,
+  logOutUser,
+} = serverSlice.actions;
 
 // Selectors
 export const getIsAuth = (state: RootState) => state.server.isAuth;
@@ -63,7 +73,6 @@ export const getUser = (state: RootState) => state.server.user;
 
 export const sendRegistrationAsync = (user: object): AppThunk => (dispatch) => {
   //Send server
-  console.log("Async sending to server");
   // Once completed with success response from server
   dispatch(sendRegistration(user));
 };
@@ -85,7 +94,6 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
   }).then(
     (res) => {
       res.json().then((json) => {
-        console.log(json);
         dispatch(
           loginSuccessful({
             email: user.email,
@@ -93,15 +101,16 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
             hashedSecret: json.hashedSecret,
           })
         );
-        console.log("before test");
-        return "test";
       });
     },
     (error) => {
       console.log(error);
-      return "error";
     }
   );
+};
+
+export const logOutUserAsync = (): AppThunk => (dispatch) => {
+  dispatch(logOutUser());
 };
 
 export default serverSlice.reducer;

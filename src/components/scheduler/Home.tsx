@@ -24,6 +24,7 @@ export const Home: React.FC = () => {
   const dispatch = useDispatch();
   const isAuth = useSelector(getIsAuth);
   const user = useSelector(getUser);
+
   if (isAuth) {
     return (
       <IonPage>

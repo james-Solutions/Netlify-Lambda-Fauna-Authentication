@@ -1,10 +1,14 @@
+// Ion Imports
 import { IonApp, IonRouterOutlet, IonSplitPane } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route } from "react-router-dom";
+
+// Component Imports
 import Menu from "./components/Menu";
 import { Home } from "./components/scheduler/Home";
-import { RegistrationCard } from "./components/user/registration/RegistrationCard";
-import { LoginCard } from "./components/user/login/LoginCard";
+import { RegistrationCard } from "./components/user/RegistrationCard";
+import { LoginCard } from "./components/user/LoginCard";
+import { Logout } from "./components/user/Logout";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -35,14 +39,17 @@ const App: React.FC = () => {
             <Route path="/" exact={true}>
               <Redirect to="/user/login" />
             </Route>
+            <Route path="/home" exact={true}>
+              <Home />
+            </Route>
             <Route path="/user/login" exact={true}>
               <LoginCard />
             </Route>
+            <Route path="/user/logout" exact={true}>
+              <Logout />
+            </Route>
             <Route path="/user/register" exact={true}>
               <RegistrationCard />
-            </Route>
-            <Route path="/home" exact={true}>
-              <Home />
             </Route>
           </IonRouterOutlet>
         </IonSplitPane>

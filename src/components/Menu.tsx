@@ -16,8 +16,15 @@ import {
   logInSharp,
   personAddOutline,
   personAddSharp,
+  homeOutline,
+  homeSharp,
+  logOutOutline,
+  logOutSharp,
 } from "ionicons/icons";
 import "./Menu.css";
+
+import { getIsAuth, getUser } from "../redux/slices/serverSlice";
+import { useSelector } from "react-redux";
 
 interface AppPage {
   url: string;
@@ -26,7 +33,7 @@ interface AppPage {
   title: string;
 }
 
-const appPages: AppPage[] = [
+const loggedOutAppPages: AppPage[] = [
   {
     title: "Login",
     url: "/user/login",
@@ -41,37 +48,76 @@ const appPages: AppPage[] = [
   },
 ];
 
+const loggedInAppPages: AppPage[] = [
+  {
+    title: "Home",
+    url: "/home",
+    iosIcon: homeOutline,
+    mdIcon: homeSharp,
+  },
+  {
+    title: "Logout",
+    url: "/user/logout",
+    iosIcon: logOutOutline,
+    mdIcon: logOutSharp,
+  },
+];
+
 const Menu: React.FC = () => {
   const location = useLocation();
-
+  const isAuth = useSelector(getIsAuth);
+  const user = useSelector(getUser);
   return (
     <IonMenu contentId="main" type="overlay">
       <IonContent>
-        <IonList id="inbox-list">
+        <IonList id="menu-list">
           <IonListHeader>Semester Schedule Planner</IonListHeader>
           <IonNote>Welcome</IonNote>
-          {appPages.map((appPage, index) => {
-            return (
-              <IonMenuToggle key={index} autoHide={false}>
-                <IonItem
-                  className={
-                    location.pathname === appPage.url ? "selected" : ""
-                  }
-                  routerLink={appPage.url}
-                  routerDirection="none"
-                  lines="none"
-                  detail={false}
-                >
-                  <IonIcon
-                    slot="start"
-                    ios={appPage.iosIcon}
-                    md={appPage.mdIcon}
-                  />
-                  <IonLabel>{appPage.title}</IonLabel>
-                </IonItem>
-              </IonMenuToggle>
-            );
-          })}
+          {isAuth === true
+            ? loggedInAppPages.map((appPage, index) => {
+                return (
+                  <IonMenuToggle key={index} autoHide={false}>
+                    <IonItem
+                      className={
+                        location.pathname === appPage.url ? "selected" : ""
+                      }
+                      routerLink={appPage.url}
+                      routerDirection="none"
+                      lines="none"
+                      detail={false}
+                    >
+                      <IonIcon
+                        slot="start"
+                        ios={appPage.iosIcon}
+                        md={appPage.mdIcon}
+                      />
+                      <IonLabel>{appPage.title}</IonLabel>
+                    </IonItem>
+                  </IonMenuToggle>
+                );
+              })
+            : loggedOutAppPages.map((appPage, index) => {
+                return (
+                  <IonMenuToggle key={index} autoHide={false}>
+                    <IonItem
+                      className={
+                        location.pathname === appPage.url ? "selected" : ""
+                      }
+                      routerLink={appPage.url}
+                      routerDirection="none"
+                      lines="none"
+                      detail={false}
+                    >
+                      <IonIcon
+                        slot="start"
+                        ios={appPage.iosIcon}
+                        md={appPage.mdIcon}
+                      />
+                      <IonLabel>{appPage.title}</IonLabel>
+                    </IonItem>
+                  </IonMenuToggle>
+                );
+              })}
         </IonList>
       </IonContent>
     </IonMenu>
