@@ -1,6 +1,7 @@
 exports.handler = (event, context, callback) => {
-    return callback(null, {
-        statusCode: 200,
-        body: {code: 1, message: 'Works'}
-    });
-}
+  console.log("hello");
+  return callback(null, {
+    statusCode: 200,
+    body: { code: 1, message: "Works" },
+  });
+};

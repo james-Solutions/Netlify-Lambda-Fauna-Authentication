@@ -17,6 +17,7 @@
     "@types/react-router": "^5.1.11",
     "@types/react-router-dom": "^5.1.7",
     "cheerio": "^1.0.0-rc.5",
+    "cross-fetch": "^3.1.4",
     "http-proxy-middleware": "^1.0.6",
     "ionicons": "^5.4.0",
     "react": "^17.0.1",
@@ -53,7 +54,6 @@
     "build:functions": "netlify-lambda build functions -c ./webpack.config.js",
     "serve": "npx netlify-lambda build lambda --config ./webpack.functions.js && npx eleventy --serve"
   },
-
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -74,7 +74,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "2.4.6",
-    "@types/react-redux": "^7.1.16"
+    "@types/react-redux": "^7.1.16",
     "chalk": "^4.1.0",
     "faunadb": "^4.1.1",
     "netlify-lambda": "^2.0.3",

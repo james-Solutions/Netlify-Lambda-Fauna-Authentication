@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunk, RootState } from "../store/store";
+import fetch from "cross-fetch";
 
 interface User {
   email: string;
@@ -54,6 +55,14 @@ export const sendLoginAsync = (user: User): AppThunk => (dispatch) => {
   console.log("Async sending to server");
   // Once completed with success response from server
   dispatch(loginSuccessful({ email: user.email, password: user.password }));
+  fetch("http://localhost:9000/login").then(
+    (res) => {
+      console.log(res);
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
 };
 
 export default serverSlice.reducer;
