@@ -24,7 +24,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   sendRegistration,
   sendRegistrationAsync,
-} from "../../../redux/slices/serverSlice";
+} from "../../redux/slices/serverSlice";
 
 export const RegistrationCard: React.FC = () => {
   const history = useHistory();
