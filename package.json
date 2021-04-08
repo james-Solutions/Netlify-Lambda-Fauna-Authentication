@@ -53,7 +53,8 @@
     "build": "npm-run-all --parallel build:** && npx netlify-lambda build lambda --config ./webpack.functions.js && npx eleventy",
     "build:app": "react-scripts build",
     "build:functions": "netlify-lambda build functions -c ./webpack.config.js",
-    "serve": "npx netlify-lambda build lambda --config ./webpack.functions.js && npx eleventy --serve"
+    "serve": "npx netlify-lambda build lambda --config ./webpack.functions.js && npx eleventy --serve",
+    "bootstrap": "node ./scripts/bootstrap-fauna-database.js"
   },
   "eslintConfig": {
     "extends": [
