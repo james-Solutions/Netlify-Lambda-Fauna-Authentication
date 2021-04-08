@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import {
   IonContent,
   IonHeader,
@@ -24,21 +24,29 @@ export const Home: React.FC = () => {
   const dispatch = useDispatch();
   const isAuth = useSelector(getIsAuth);
   const user = useSelector(getUser);
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Home</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent>
-        <IonCard>
-          <IonCardHeader>Welcome {user.username}</IonCardHeader>
-          <IonCardContent>
-            Authentication: {isAuth ? "Authenticated" : "Not Authenticated"}
-          </IonCardContent>
-        </IonCard>
-      </IonContent>
-    </IonPage>
-  );
+  if (isAuth) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Home</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <IonCard>
+            <IonCardHeader>Welcome {user.username}</IonCardHeader>
+            <IonCardContent>
+              Authentication: {isAuth ? "Authenticated" : "Not Authenticated"}
+            </IonCardContent>
+          </IonCard>
+        </IonContent>
+      </IonPage>
+    );
+  } else {
+    return (
+      <IonPage>
+        <Redirect to="/user/login" />
+      </IonPage>
+    );
+  }
 };

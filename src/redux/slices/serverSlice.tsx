@@ -19,7 +19,7 @@ if (data !== null) {
 }
 
 const initialState = {
-  isAuth: false,
+  isAuth: sessionUserInfo !== null ? true : false,
   user: {
     email: sessionUserInfo !== null ? sessionUserInfo.email : "",
     username: sessionUserInfo !== null ? sessionUserInfo.username : "",
@@ -67,6 +67,7 @@ export const sendRegistrationAsync = (user: object): AppThunk => (dispatch) => {
   // Once completed with success response from server
   dispatch(sendRegistration(user));
 };
+
 export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
   dispatch
 ) => {
@@ -92,10 +93,13 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
             hashedSecret: json.hashedSecret,
           })
         );
+        console.log("before test");
+        return "test";
       });
     },
     (error) => {
       console.log(error);
+      return "error";
     }
   );
 };

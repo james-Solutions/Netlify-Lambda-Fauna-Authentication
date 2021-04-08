@@ -12,7 +12,7 @@ exports.handler = (event, context, callback) => {
     const hashedSecret = crypto
       .createHash("sha256")
       .update(postData.email + postData.password)
-      .digest("base64");
+      .digest("hex");
     return callback(null, {
       statusCode: 200,
       headers,
