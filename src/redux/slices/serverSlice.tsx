@@ -10,6 +10,7 @@ interface LoginRequestUser {
 interface LoggedInUser {
   email: string;
   username: string;
+  hashedSecret: string;
 }
 
 // Redux Slice
@@ -20,6 +21,7 @@ const serverSlice = createSlice({
     user: {
       email: "",
       username: "",
+      hashedSecret: "",
     },
   },
   reducers: {
@@ -29,10 +31,11 @@ const serverSlice = createSlice({
       console.log(payload);
     },
     loginSuccessful: (state, action: PayloadAction<LoggedInUser>) => {
-      const { email, username } = action.payload;
+      const { email, username, hashedSecret } = action.payload;
       state.isAuth = true;
       state.user.email = email;
       state.user.username = username;
+      state.user.hashedSecret = hashedSecret;
     },
   },
 });
@@ -56,13 +59,24 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
   //Send server
   // Once completed with success response from server
   fetch("http://localhost:9000/login", {
-    method: "GET",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: user.email,
+      password: user.password,
+    }),
   }).then(
     (res) => {
       res.json().then((json) => {
         console.log(json);
         dispatch(
-          loginSuccessful({ email: user.email, username: json.username })
+          loginSuccessful({
+            email: user.email,
+            username: json.username,
+            hashedSecret: json.hashedSecret,
+          })
         );
       });
     },
