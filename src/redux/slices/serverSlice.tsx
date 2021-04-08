@@ -36,11 +36,6 @@ const serverSlice = createSlice({
 export const { sendRegistration, loginSuccessful } = serverSlice.actions;
 
 // Selectors
-// export const selectConnectionInfo = (state) => {
-//     const { isConnected, isUpload, isDownload } = state.server;
-
-//     return { isConnected, isUpload, isDownload };
-// };
 export const getIsAuth = (state: RootState) => state.server.isAuth;
 export const getUser = (state: RootState) => state.server.user;
 
@@ -55,9 +50,13 @@ export const sendLoginAsync = (user: User): AppThunk => (dispatch) => {
   console.log("Async sending to server");
   // Once completed with success response from server
   dispatch(loginSuccessful({ email: user.email, password: user.password }));
-  fetch("http://localhost:9000/login").then(
+  fetch("http://localhost:9000/login", {
+    method: "GET",
+  }).then(
     (res) => {
-      console.log(res);
+      res.json().then((json) => {
+        console.log(json);
+      });
     },
     (error) => {
       console.log(error);

@@ -1,7 +1,11 @@
 exports.handler = (event, context, callback) => {
-  console.log("hello");
   return callback(null, {
     statusCode: 200,
-    body: { code: 1, message: "Works" },
+    headers: {
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTION",
+    },
+    body: JSON.stringify({ code: 1, message: "Works" }),
   });
 };
