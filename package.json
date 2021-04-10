@@ -3,9 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "@11ty/eleventy": "^0.12.1",
+    "@babel/core": "^7.13.15",
     "@capacitor/core": "2.4.6",
     "@ionic/react": "^5.5.0",
     "@ionic/react-router": "^5.5.0",
+    "@reduxjs/toolkit": "^1.5.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.6.3",
@@ -16,10 +19,12 @@
     "@types/react-router": "^5.1.11",
     "@types/react-router-dom": "^5.1.7",
     "cheerio": "^1.0.0-rc.5",
+    "cross-fetch": "^3.1.4",
     "http-proxy-middleware": "^1.0.6",
     "ionicons": "^5.4.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-redux": "^7.2.2",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.2",
@@ -46,12 +51,12 @@
     "start:app": "react-scripts start",
     "start:server": "netlify-lambda serve functions -c ./webpack.config.js",
     "prebuild": "echo 'setup faunaDB' && npm run bootstrap",
-    "build": "npm-run-all --parallel build:** && npx netlify-lambda build lambda --config ./webpack.functions.js && npx eleventy",
+    "build": "npm-run-all --parallel build:** && npx netlify-lambda build ./functions --config ./webpack.config.js && npx eleventy",
     "build:app": "react-scripts build",
     "build:functions": "netlify-lambda build functions -c ./webpack.config.js",
-    "serve": "npx netlify-lambda build lambda --config ./webpack.functions.js && npx eleventy --serve"
+    "serve": "npx netlify-lambda build lambda --config ./webpack.config.js && npx eleventy --serve",
+    "bootstrap": "node ./scripts/bootstrap-fauna-database.js"
   },
-
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -72,6 +77,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "2.4.6",
+    "@types/react-redux": "^7.1.16",
     "chalk": "^4.1.0",
     "faunadb": "^4.1.1",
     "netlify-lambda": "^2.0.3",
