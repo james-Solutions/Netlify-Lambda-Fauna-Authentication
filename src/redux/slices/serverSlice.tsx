@@ -82,7 +82,7 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
 ) => {
   //Send server
   // Once completed with success response from server
-  fetch("http://localhost:9000/login", {
+  fetch("/.netlify/functions/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
