@@ -5,7 +5,7 @@
   "dependencies": {
     "@11ty/eleventy": "^0.12.1",
     "@babel/core": "^7.13.15",
-    "@capacitor/core": "2.4.6",
+    "@capacitor/core": "2.4.7",
     "@ionic/react": "^5.5.0",
     "@ionic/react-router": "^5.5.0",
     "@reduxjs/toolkit": "^1.5.0",
