@@ -32,3 +32,8 @@ yarn-error.log*
 
 #Secret env
 .env
+
+#Github
+/.github
+.github
+.github\dependabot.yml
