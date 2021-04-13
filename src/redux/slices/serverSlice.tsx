@@ -7,6 +7,12 @@ import {
   RegistrationRequest,
 } from "../interfaces/interfaces";
 
+let apiUrl = "/.netlify/functions";
+
+if (process.env.REACT_APP_DEV === "true") {
+  apiUrl = "http://localhost:9000" + apiUrl;
+}
+
 const data = sessionStorage.getItem("user-info");
 let sessionUserInfo = null;
 if (data !== null) {
@@ -64,7 +70,7 @@ export const registrationRequest = (user: RegistrationRequest): AppThunk => (
 ) => {
   //Send server
   // Once completed with success response from server
-  fetch("/.netlify/functions/register", {
+  fetch(`${apiUrl}/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -97,7 +103,7 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
 ) => {
   //Send server
   // Once completed with success response from server
-  fetch("/.netlify/functions/login", {
+  fetch(`${apiUrl}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

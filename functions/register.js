@@ -3,7 +3,7 @@ const faunadb = require("faunadb");
 /* configure faunaDB Client with our secret */
 const query = faunadb.query;
 const client = new faunadb.Client({
-  secret: process.env.MY_FAUNA_SECRET,
+  secret: process.env.REACT_APP_FAUNA_SECRET,
 });
 
 const headers = {
