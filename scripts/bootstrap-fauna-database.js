@@ -1,26 +1,77 @@
+/* bootstrap database in your FaunaDB account */
 const faunadb = require("faunadb");
-
+const chalk = require("chalk");
+const insideNetlify = insideNetlifyBuildContext();
 const q = faunadb.query;
-let client = null;
-if (process.env.REACT_APP_FAUNA_SECRET !== undefined) {
-  client = new faunadb.Client({
-    secret: process.env.REACT_APP_FAUNA_SECRET,
+
+console.log(chalk.cyan("Creating your FaunaDB Database...\n"));
+
+// 1. Check for required environment variables
+if (!process.env.REACT_APP_FAUNA_SECRET) {
+  console.log(
+    chalk.yellow(
+      "Required REACT_APP_FAUNA_SECRET environment variable not found."
+    )
+  );
+  console.log(
+    `Make sure you have created your Fauna database with "netlify addons:create fauna"`
+  );
+  console.log(`Then run "npm run bootstrap" to setup your database schema`);
+  if (insideNetlify) {
+    process.exit(1);
+  }
+}
+
+// Has var. Do the thing
+if (process.env.REACT_APP_FAUNA_SECRET) {
+  createFaunaDB(process.env.REACT_APP_FAUNA_SECRET).then(() => {
+    console.log("Fauna Database schema has been created");
+    console.log('Claim your fauna database with "netlify addons:auth fauna"');
   });
 }
 
-async function testCreateConnection() {
-  return new Promise((resolve, reject) => {
-    if (client !== null) {
-      client
-        .query(q.Create(q.Ref("test"), "test"))
-        .then((response) => {
-          console.log("Success");
-          console.log(response);
-          resolve(response);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    }
+/* idempotent operation */
+function createFaunaDB(key) {
+  console.log("Create the fauna database schema!");
+  const client = new faunadb.Client({
+    secret: key,
   });
+
+  /* Based on your requirements, change the schema here */
+  return client
+    .query(q.Create(q.Ref("users")))
+    .then(() => {
+      return client.query(
+        q.Create(q.Ref("indexes"), {
+          name: "users_by_email",
+          source: q.Ref("users"),
+          unique: true,
+          terms: [{ field: ["data", "email"] }],
+          permissions: { read: "public" },
+        })
+      );
+    })
+    .catch((e) => {
+      // Database already exists
+      if (
+        e.requestResult.statusCode === 400 &&
+        e.message === "instance not unique"
+      ) {
+        console.log("Fauna already setup! Good to go");
+        console.log(
+          'Claim your fauna database with "netlify addons:auth fauna"'
+        );
+        throw e;
+      }
+    });
+}
+
+/* util methods */
+
+// Test if inside netlify build context
+function insideNetlifyBuildContext() {
+  if (process.env.DEPLOY_PRIME_URL) {
+    return true;
+  }
+  return false;
 }

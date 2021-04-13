@@ -1,17 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunk, RootState } from "../store/store";
 import fetch from "cross-fetch";
+import {
+  LoggedInUser,
+  LoginRequestUser,
+  RegistrationRequest,
+} from "../interfaces/interfaces";
 
-interface LoginRequestUser {
-  email: string;
-  password: string;
+let apiUrl = "/.netlify/functions";
+
+if (process.env.REACT_APP_DEV === "true") {
+  apiUrl = "http://localhost:9000" + apiUrl;
 }
 
-interface LoggedInUser {
-  email: string;
-  username: string;
-  hashedSecret: string;
-}
 const data = sessionStorage.getItem("user-info");
 let sessionUserInfo = null;
 if (data !== null) {
@@ -23,7 +24,7 @@ const initialState = {
   user: {
     email: sessionUserInfo !== null ? sessionUserInfo.email : "",
     username: sessionUserInfo !== null ? sessionUserInfo.username : "",
-    hashedSecret: "",
+    secret: "",
   },
 };
 
@@ -32,15 +33,12 @@ const serverSlice = createSlice({
   name: "server",
   initialState,
   reducers: {
-    sendRegistration: (state, action: PayloadAction<object>) => {
-      const { payload } = action;
-    },
     loginSuccessful: (state, action: PayloadAction<LoggedInUser>) => {
-      const { email, username, hashedSecret } = action.payload;
+      const { email, username, secret } = action.payload;
       state.isAuth = true;
       state.user.email = email;
       state.user.username = username;
-      state.user.hashedSecret = hashedSecret;
+      state.user.secret = secret;
       sessionStorage.setItem(
         "user-info",
         JSON.stringify({
@@ -55,26 +53,49 @@ const serverSlice = createSlice({
       state.isAuth = false;
       state.user.email = "";
       state.user.username = "";
-      state.user.hashedSecret = "";
+      state.user.secret = "";
     },
   },
 });
 
 // Actions
-export const {
-  sendRegistration,
-  loginSuccessful,
-  logOutUser,
-} = serverSlice.actions;
+export const { loginSuccessful, logOutUser } = serverSlice.actions;
 
 // Selectors
 export const getIsAuth = (state: RootState) => state.server.isAuth;
 export const getUser = (state: RootState) => state.server.user;
 
-export const sendRegistrationAsync = (user: object): AppThunk => (dispatch) => {
+export const registrationRequest = (user: RegistrationRequest): AppThunk => (
+  dispatch
+) => {
   //Send server
   // Once completed with success response from server
-  dispatch(sendRegistration(user));
+  fetch(`${apiUrl}/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: user.email,
+      username: user.username,
+      password: user.password,
+      accessLevel: user.accessLevel,
+    }),
+  }).then(
+    (res) => {
+      res.json().then((response) => {
+        if (response.message === "Successful") {
+          window.location.replace("/user/login");
+          return true;
+        } else {
+          return false;
+        }
+      });
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
 };
 
 export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
@@ -82,7 +103,7 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
 ) => {
   //Send server
   // Once completed with success response from server
-  fetch("/.netlify/functions/login", {
+  fetch(`${apiUrl}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -93,12 +114,12 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
     }),
   }).then(
     (res) => {
-      res.json().then((json) => {
+      res.json().then((response) => {
         dispatch(
           loginSuccessful({
             email: user.email,
-            username: json.username,
-            hashedSecret: json.hashedSecret,
+            username: response.username,
+            secret: response.secret,
           })
         );
       });
