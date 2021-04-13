@@ -7,9 +7,11 @@ const q = faunadb.query;
 console.log(chalk.cyan("Creating your FaunaDB Database...\n"));
 
 // 1. Check for required environment variables
-if (!process.env.MY_FAUNA_SECRET) {
+if (!process.env.REACT_APP_FAUNA_SECRET) {
   console.log(
-    chalk.yellow("Required MY_FAUNA_SECRET environment variable not found.")
+    chalk.yellow(
+      "Required REACT_APP_FAUNA_SECRET environment variable not found."
+    )
   );
   console.log(
     `Make sure you have created your Fauna database with "netlify addons:create fauna"`
@@ -21,8 +23,8 @@ if (!process.env.MY_FAUNA_SECRET) {
 }
 
 // Has var. Do the thing
-if (process.env.MY_FAUNA_SECRET) {
-  createFaunaDB(process.env.MY_FAUNA_SECRET).then(() => {
+if (process.env.REACT_APP_FAUNA_SECRET) {
+  createFaunaDB(process.env.REACT_APP_FAUNA_SECRET).then(() => {
     console.log("Fauna Database schema has been created");
     console.log('Claim your fauna database with "netlify addons:auth fauna"');
   });
