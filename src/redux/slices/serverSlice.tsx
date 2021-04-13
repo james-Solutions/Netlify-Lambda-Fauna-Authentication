@@ -1,17 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunk, RootState } from "../store/store";
 import fetch from "cross-fetch";
+import {
+  LoggedInUser,
+  LoginRequestUser,
+  RegistrationRequest,
+} from "../interfaces/interfaces";
 
-interface LoginRequestUser {
-  email: string;
-  password: string;
-}
-
-interface LoggedInUser {
-  email: string;
-  username: string;
-  hashedSecret: string;
-}
 const data = sessionStorage.getItem("user-info");
 let sessionUserInfo = null;
 if (data !== null) {
@@ -23,7 +18,7 @@ const initialState = {
   user: {
     email: sessionUserInfo !== null ? sessionUserInfo.email : "",
     username: sessionUserInfo !== null ? sessionUserInfo.username : "",
-    hashedSecret: "",
+    secret: "",
   },
 };
 
@@ -32,15 +27,15 @@ const serverSlice = createSlice({
   name: "server",
   initialState,
   reducers: {
-    sendRegistration: (state, action: PayloadAction<object>) => {
+    registrationSuccessful: (state, action: PayloadAction<object>) => {
       const { payload } = action;
     },
     loginSuccessful: (state, action: PayloadAction<LoggedInUser>) => {
-      const { email, username, hashedSecret } = action.payload;
+      const { email, username, secret } = action.payload;
       state.isAuth = true;
       state.user.email = email;
       state.user.username = username;
-      state.user.hashedSecret = hashedSecret;
+      state.user.secret = secret;
       sessionStorage.setItem(
         "user-info",
         JSON.stringify({
@@ -55,14 +50,14 @@ const serverSlice = createSlice({
       state.isAuth = false;
       state.user.email = "";
       state.user.username = "";
-      state.user.hashedSecret = "";
+      state.user.secret = "";
     },
   },
 });
 
 // Actions
 export const {
-  sendRegistration,
+  registrationSuccessful,
   loginSuccessful,
   logOutUser,
 } = serverSlice.actions;
@@ -71,10 +66,39 @@ export const {
 export const getIsAuth = (state: RootState) => state.server.isAuth;
 export const getUser = (state: RootState) => state.server.user;
 
-export const sendRegistrationAsync = (user: object): AppThunk => (dispatch) => {
+export const sendRegistrationAsync = (user: RegistrationRequest): AppThunk => (
+  dispatch
+) => {
   //Send server
   // Once completed with success response from server
-  dispatch(sendRegistration(user));
+  fetch("/.netlify/functions/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: user.email,
+      username: user.username,
+      password: user.password,
+      accessLevel: user.accessLevel,
+    }),
+  }).then(
+    (res) => {
+      res.json().then((json) => {
+        // TODO: Return a true/false depending if the request was successful.
+        // dispatch(
+        //   registrationSuccessful({
+        //     email: user.email,
+        //     username: json.username,
+        //     secret: json.secret,
+        //   })
+        // );
+      });
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
 };
 
 export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
@@ -98,7 +122,7 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
           loginSuccessful({
             email: user.email,
             username: json.username,
-            hashedSecret: json.hashedSecret,
+            secret: json.secret,
           })
         );
       });
