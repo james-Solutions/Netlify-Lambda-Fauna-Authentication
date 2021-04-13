@@ -27,9 +27,6 @@ const serverSlice = createSlice({
   name: "server",
   initialState,
   reducers: {
-    registrationSuccessful: (state, action: PayloadAction<object>) => {
-      const { payload } = action;
-    },
     loginSuccessful: (state, action: PayloadAction<LoggedInUser>) => {
       const { email, username, secret } = action.payload;
       state.isAuth = true;
@@ -56,17 +53,13 @@ const serverSlice = createSlice({
 });
 
 // Actions
-export const {
-  registrationSuccessful,
-  loginSuccessful,
-  logOutUser,
-} = serverSlice.actions;
+export const { loginSuccessful, logOutUser } = serverSlice.actions;
 
 // Selectors
 export const getIsAuth = (state: RootState) => state.server.isAuth;
 export const getUser = (state: RootState) => state.server.user;
 
-export const sendRegistrationAsync = (user: RegistrationRequest): AppThunk => (
+export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   dispatch
 ) => {
   //Send server
@@ -84,15 +77,13 @@ export const sendRegistrationAsync = (user: RegistrationRequest): AppThunk => (
     }),
   }).then(
     (res) => {
-      res.json().then((json) => {
-        // TODO: Return a true/false depending if the request was successful.
-        // dispatch(
-        //   registrationSuccessful({
-        //     email: user.email,
-        //     username: json.username,
-        //     secret: json.secret,
-        //   })
-        // );
+      res.json().then((response) => {
+        if (response.message === "Successful") {
+          window.location.replace("/user/login");
+          return true;
+        } else {
+          return false;
+        }
       });
     },
     (error) => {
@@ -117,12 +108,12 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
     }),
   }).then(
     (res) => {
-      res.json().then((json) => {
+      res.json().then((response) => {
         dispatch(
           loginSuccessful({
             email: user.email,
-            username: json.username,
-            secret: json.secret,
+            username: response.username,
+            secret: response.secret,
           })
         );
       });
