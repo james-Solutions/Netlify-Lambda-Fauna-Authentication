@@ -24,7 +24,7 @@ const initialState = {
   user: {
     email: sessionUserInfo !== null ? sessionUserInfo.email : "",
     username: sessionUserInfo !== null ? sessionUserInfo.username : "",
-    secret: "",
+    secret: sessionUserInfo !== null ? sessionUserInfo.secret : "",
   },
   registrationSuccess: false,
   sendingRegistration: false,
@@ -46,6 +46,7 @@ const serverSlice = createSlice({
         JSON.stringify({
           email: state.user.email,
           username: state.user.username,
+          secret: state.user.secret,
         })
       );
       window.location.replace("/home");
@@ -117,7 +118,7 @@ export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   );
 };
 
-export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
+export const loginRequest = (user: LoginRequestUser): AppThunk => (
   dispatch
 ) => {
   //Send server
@@ -133,15 +134,25 @@ export const sendLoginAsync = (user: LoginRequestUser): AppThunk => (
     }),
   }).then(
     (res) => {
-      res.json().then((response) => {
-        dispatch(
-          loginSuccessful({
-            email: user.email,
-            username: response.username,
-            secret: response.secret,
-          })
-        );
-      });
+      res
+        .json()
+        .then((response) => {
+          if (response.message === "Success") {
+            dispatch(
+              loginSuccessful({
+                email: user.email,
+                username: user.email,
+                secret: response.secret,
+              })
+            );
+          } else {
+            console.log(response.message);
+            console.log(response.description);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
     (error) => {
       console.log(error);

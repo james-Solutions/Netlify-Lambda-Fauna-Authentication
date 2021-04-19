@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Redirect, useHistory } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import {
   IonContent,
   IonHeader,
@@ -17,11 +17,10 @@ import {
   IonToast,
 } from "@ionic/react";
 
-import { sendLoginAsync, getIsAuth } from "../../redux/slices/serverSlice";
+import { loginRequest, getIsAuth } from "../../redux/slices/serverSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 export const LoginCard: React.FC = () => {
-  const history = useHistory();
   const dispatch = useDispatch();
   const isAuth = useSelector(getIsAuth);
 
@@ -44,10 +43,7 @@ export const LoginCard: React.FC = () => {
     ) {
       // Everything is sanitized!!!
       setInputToastError(false);
-      dispatch(sendLoginAsync({ email: email, password: password }));
-      setLoginSuccessfulToast(true);
-
-      clearAllInput();
+      dispatch(loginRequest({ email: email, password: password }));
     } else {
       setInputToastError(true);
     }

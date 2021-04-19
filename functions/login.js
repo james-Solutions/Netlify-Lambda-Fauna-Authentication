@@ -1,4 +1,10 @@
-import crypto from "crypto";
+const faunadb = require("faunadb");
+
+/* configure faunaDB Client with our secret */
+const query = faunadb.query;
+const client = new faunadb.Client({
+  secret: process.env.REACT_APP_FAUNA_SECRET,
+});
 
 const headers = {
   "Access-Control-Allow-Headers": "Content-Type",
@@ -9,15 +15,27 @@ const headers = {
 exports.handler = (event, context, callback) => {
   if (event.httpMethod === "POST") {
     const postData = JSON.parse(event.body);
-    const hashedSecret = crypto
-      .createHash("sha256")
-      .update(postData.email + postData.password)
-      .digest("hex");
-    return callback(null, {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ username: postData.email, hashedSecret }),
-    });
+    loginAndGetToken({ email: postData.email, password: postData.password })
+      .then((response) => {
+        return callback(null, {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ message: "Success", secret: response.secret }),
+        });
+      })
+      .catch((error) => {
+        console.log("Error!");
+        console.log(error);
+        const jsonData = JSON.parse(error);
+        return callback(null, {
+          statusCode: jsonData.requestResult.statusCode,
+          headers,
+          body: JSON.stringify({
+            message: jsonData.message,
+            description: jsonData.description,
+          }),
+        });
+      });
   } else {
     return callback(null, {
       statusCode: 200,
@@ -26,3 +44,10 @@ exports.handler = (event, context, callback) => {
     });
   }
 };
+
+async function loginAndGetToken(userData) {
+  const { email, password } = userData;
+  return client.query(
+    query.Login(query.Match(query.Index("users_by_email"), email), { password })
+  );
+}
