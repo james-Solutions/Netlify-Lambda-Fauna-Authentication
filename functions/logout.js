@@ -26,7 +26,7 @@ exports.handler = (event, context, callback) => {
           });
         } else {
           return callback(null, {
-            statusCode: 400,
+            statusCode: 200,
             headers,
             body: JSON.stringify({ message: "Failure" }),
           });
@@ -34,7 +34,7 @@ exports.handler = (event, context, callback) => {
       })
       .catch((error) => {
         return callback(null, {
-          statusCode: 400,
+          statusCode: 200,
           headers,
           body: JSON.stringify({ message: "Failure" }),
         });

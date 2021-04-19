@@ -36,6 +36,32 @@ exports.handler = (event, context, callback) => {
           }),
         });
       });
+  } else if (event.httpMethod === "GET") {
+    client
+      .query(query.Logout(false))
+      .then((response) => {
+        console.log(response);
+        if (response === true) {
+          return callback(null, {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({ message: "Success" }),
+          });
+        } else {
+          return callback(null, {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({ message: "Failure" }),
+          });
+        }
+      })
+      .catch((error) => {
+        return callback(null, {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ message: "Failure" }),
+        });
+      });
   } else {
     return callback(null, {
       statusCode: 200,

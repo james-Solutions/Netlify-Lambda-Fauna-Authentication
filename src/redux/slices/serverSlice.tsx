@@ -52,7 +52,8 @@ const serverSlice = createSlice({
         })
       );
     },
-    logOutUser: (state) => {
+    logOutSuccessful: (state) => {
+      console.log("clearing");
       sessionStorage.clear();
       state.isAuth = false;
       state.user.email = "";
@@ -75,7 +76,7 @@ const serverSlice = createSlice({
 // Actions
 export const {
   loginSuccessful,
-  logOutUser,
+  logOutSuccessful,
   registrationSuccessful,
   updateSendingRegistration,
   updateSendingLogin,
@@ -167,8 +168,27 @@ export const loginRequest = (user: LoginRequestUser): AppThunk => (
   );
 };
 
-export const logOutUserAsync = (): AppThunk => (dispatch) => {
-  dispatch(logOutUser());
+export const logOutUser = (): AppThunk => (dispatch) => {
+  // Fetch
+  fetch(`${apiUrl}/login`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then(
+    (resRaw) => {
+      resRaw.json().then((response) => {
+        dispatch(logOutSuccessful());
+        if (response.message === "Success") {
+        } else {
+          console.log("Could not logout");
+        }
+      });
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
 };
 
 export default serverSlice.reducer;
