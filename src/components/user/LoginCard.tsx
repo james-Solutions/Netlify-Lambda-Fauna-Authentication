@@ -15,14 +15,20 @@ import {
   IonButton,
   IonInput,
   IonToast,
+  IonProgressBar,
 } from "@ionic/react";
 
-import { loginRequest, getIsAuth } from "../../redux/slices/serverSlice";
+import {
+  loginRequest,
+  getIsAuth,
+  getSendingLogin,
+} from "../../redux/slices/serverSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 export const LoginCard: React.FC = () => {
   const dispatch = useDispatch();
   const isAuth = useSelector(getIsAuth);
+  const sendingLogin = useSelector(getSendingLogin);
 
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
@@ -69,11 +75,6 @@ export const LoginCard: React.FC = () => {
     setPassword(inputPassword);
   };
 
-  const clearAllInput = () => {
-    setEmail("");
-    setPassword("");
-  };
-
   const errorStyle = {
     color: "red",
     padding: "0.5rem",
@@ -82,7 +83,7 @@ export const LoginCard: React.FC = () => {
 
   if (isAuth) {
     return <Redirect to="/home" />;
-  } else {
+  } else if (sendingLogin === false) {
     return (
       <IonPage>
         <IonHeader>
@@ -159,5 +160,27 @@ export const LoginCard: React.FC = () => {
         </IonContent>
       </IonPage>
     );
+  } else if (sendingLogin === true) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Login</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Sending Login Request</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonProgressBar type="indeterminate"></IonProgressBar>
+            </IonCardContent>
+          </IonCard>
+        </IonContent>
+      </IonPage>
+    );
+  } else {
+    return <IonPage></IonPage>;
   }
 };
