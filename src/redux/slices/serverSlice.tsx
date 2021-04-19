@@ -26,6 +26,8 @@ const initialState = {
     username: sessionUserInfo !== null ? sessionUserInfo.username : "",
     secret: "",
   },
+  registrationSuccess: false,
+  sendingRegistration: false,
 };
 
 // Redux Slice
@@ -55,21 +57,38 @@ const serverSlice = createSlice({
       state.user.username = "";
       state.user.secret = "";
     },
+    registrationSuccessful: (state, action: PayloadAction<boolean>) => {
+      state.registrationSuccess = action.payload;
+      state.sendingRegistration = !action.payload;
+    },
+    updateSendingRegistration: (state, action: PayloadAction<boolean>) => {
+      state.sendingRegistration = action.payload;
+    },
   },
 });
 
 // Actions
-export const { loginSuccessful, logOutUser } = serverSlice.actions;
+export const {
+  loginSuccessful,
+  logOutUser,
+  registrationSuccessful,
+  updateSendingRegistration,
+} = serverSlice.actions;
 
 // Selectors
 export const getIsAuth = (state: RootState) => state.server.isAuth;
 export const getUser = (state: RootState) => state.server.user;
+export const getRegistrationSuccess = (state: RootState) =>
+  state.server.registrationSuccess;
+export const getSendingRegistration = (state: RootState) =>
+  state.server.sendingRegistration;
 
 export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   dispatch
 ) => {
   //Send server
   // Once completed with success response from server
+  dispatch(updateSendingRegistration(true));
   fetch(`${apiUrl}/register`, {
     method: "POST",
     headers: {
@@ -85,7 +104,7 @@ export const registrationRequest = (user: RegistrationRequest): AppThunk => (
     (res) => {
       res.json().then((response) => {
         if (response.message === "Successful") {
-          window.location.replace("/user/login");
+          dispatch(registrationSuccessful(true));
           return true;
         } else {
           return false;
