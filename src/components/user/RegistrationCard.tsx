@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
 import {
   IonContent,
   IonHeader,
@@ -19,13 +18,19 @@ import {
   IonRadio,
   IonItemDivider,
   IonToast,
+  IonProgressBar,
 } from "@ionic/react";
 import { useSelector, useDispatch } from "react-redux";
-import { registrationRequest } from "../../redux/slices/serverSlice";
+import {
+  registrationRequest,
+  getRegistrationSuccess,
+  getSendingRegistration,
+} from "../../redux/slices/serverSlice";
 
 export const RegistrationCard: React.FC = () => {
-  const history = useHistory();
   const dispatch = useDispatch();
+  const registrationSuccess = useSelector(getRegistrationSuccess);
+  const registrationInProgress = useSelector(getSendingRegistration);
   const [email, setEmail] = useState<string>();
   const [username, setUsername] = useState<string>();
   const [password, setPassword] = useState<string>();
@@ -70,9 +75,6 @@ export const RegistrationCard: React.FC = () => {
           accessLevel: selected,
         })
       );
-      // setRegistrationSuccessfulToast(true);
-      // history.push("/user/login");
-      // clearAllInput();
     } else {
       setInputToastError(true);
     }
@@ -143,149 +145,196 @@ export const RegistrationCard: React.FC = () => {
     padding: "0.5rem",
     fontStyle: "italic",
   };
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Registration</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent>
-        <IonCard>
-          <IonCardHeader>
-            <IonCardTitle>Enter New User Information:</IonCardTitle>
-          </IonCardHeader>
-          <IonCardContent>
-            {/* Start basic user info */}
-            <IonItem>
-              <IonLabel position="floating">Email</IonLabel>
-              <IonInput
-                value={email}
-                onIonChange={(event) => emailInputHandler(event.detail.value!)}
-                type="email"
-                pattern="email"
-                autocomplete="email"
-                required={true}
-              ></IonInput>
-            </IonItem>
-            {showEmailError ? (
-              <div style={errorStyle}>Invalid Email</div>
-            ) : (
-              <div />
-            )}
-            <IonItem>
-              <IonLabel position="floating">Username</IonLabel>
-              <IonInput
-                value={username}
-                onIonChange={(event) =>
-                  usernameInputHandler(event.detail.value!)
-                }
-                required={true}
-              ></IonInput>
-            </IonItem>
-            {showUsernameError ? (
-              <div style={errorStyle}>
-                Invalid Username, may only contain letters and digits
-              </div>
-            ) : (
-              <div />
-            )}
-            <IonItem>
-              <IonLabel position="floating">Password</IonLabel>
-              <IonInput
-                value={password}
-                onIonChange={(event) =>
-                  passwordInputHandler(event.detail.value!)
-                }
-                type="password"
-                pattern="password"
-                autocomplete="new-password"
-                required={true}
-              ></IonInput>
-            </IonItem>
-            {showPasswordError ? (
-              <div style={errorStyle}>
-                Invalid Password. Password must be 8 to 15 characters which
-                contain at least one lowercase letter, one uppercase letter, one
-                numeric digit, and one special character
-              </div>
-            ) : (
-              <div />
-            )}
-            <IonItem>
-              <IonLabel position="floating">Verify Password</IonLabel>
-              <IonInput
-                value={verifyPassword}
-                onIonChange={(event) =>
-                  verifyPasswordInputHandler(event.detail.value!)
-                }
-                type="password"
-                pattern="password"
-                autocomplete="new-password"
-                required={true}
-              ></IonInput>
-            </IonItem>
-            {showPasswordsNotMatchError ? (
-              <div style={errorStyle}>
-                Passwords do <u>NOT</u> match
-              </div>
-            ) : (
-              <div />
-            )}
-            {/* End Basic User Information */}
-            {/* Start Access Level Radio Group */}
-            <IonRadioGroup
-              value={selected}
-              onIonChange={(e) => setSelected(e.detail.value)}
-            >
-              <IonListHeader>
-                <IonLabel>Requested Access Level</IonLabel>
-              </IonListHeader>
 
+  if (registrationSuccess === false && registrationInProgress === false) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Registration</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Enter New User Information:</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              {/* Start basic user info */}
               <IonItem>
-                <IonLabel>Student</IonLabel>
-                <IonRadio slot="start" value="Student" />
+                <IonLabel position="floating">Email</IonLabel>
+                <IonInput
+                  value={email}
+                  onIonChange={(event) =>
+                    emailInputHandler(event.detail.value!)
+                  }
+                  type="email"
+                  pattern="email"
+                  autocomplete="email"
+                  required={true}
+                ></IonInput>
               </IonItem>
+              {showEmailError ? (
+                <div style={errorStyle}>Invalid Email</div>
+              ) : (
+                <div />
+              )}
+              <IonItem>
+                <IonLabel position="floating">Username</IonLabel>
+                <IonInput
+                  value={username}
+                  onIonChange={(event) =>
+                    usernameInputHandler(event.detail.value!)
+                  }
+                  required={true}
+                ></IonInput>
+              </IonItem>
+              {showUsernameError ? (
+                <div style={errorStyle}>
+                  Invalid Username, may only contain letters and digits
+                </div>
+              ) : (
+                <div />
+              )}
+              <IonItem>
+                <IonLabel position="floating">Password</IonLabel>
+                <IonInput
+                  value={password}
+                  onIonChange={(event) =>
+                    passwordInputHandler(event.detail.value!)
+                  }
+                  type="password"
+                  pattern="password"
+                  autocomplete="new-password"
+                  required={true}
+                ></IonInput>
+              </IonItem>
+              {showPasswordError ? (
+                <div style={errorStyle}>
+                  Invalid Password. Password must be 8 to 15 characters which
+                  contain at least one lowercase letter, one uppercase letter,
+                  one numeric digit, and one special character
+                </div>
+              ) : (
+                <div />
+              )}
+              <IonItem>
+                <IonLabel position="floating">Verify Password</IonLabel>
+                <IonInput
+                  value={verifyPassword}
+                  onIonChange={(event) =>
+                    verifyPasswordInputHandler(event.detail.value!)
+                  }
+                  type="password"
+                  pattern="password"
+                  autocomplete="new-password"
+                  required={true}
+                ></IonInput>
+              </IonItem>
+              {showPasswordsNotMatchError ? (
+                <div style={errorStyle}>
+                  Passwords do <u>NOT</u> match
+                </div>
+              ) : (
+                <div />
+              )}
+              {/* End Basic User Information */}
+              {/* Start Access Level Radio Group */}
+              <IonRadioGroup
+                value={selected}
+                onIonChange={(e) => setSelected(e.detail.value)}
+              >
+                <IonListHeader>
+                  <IonLabel>Requested Access Level</IonLabel>
+                </IonListHeader>
 
-              <IonItem>
-                <IonLabel>Administrator</IonLabel>
-                <IonRadio slot="start" value="Administrator" />
-              </IonItem>
+                <IonItem>
+                  <IonLabel>Student</IonLabel>
+                  <IonRadio slot="start" value="Student" />
+                </IonItem>
 
-              <IonItem>
-                <IonLabel>Root</IonLabel>
-                <IonRadio slot="start" value="Root" />
-              </IonItem>
-            </IonRadioGroup>
-            <IonItemDivider>Your Requested Access Level:</IonItemDivider>
-            <IonItem>{selected ?? "(none selected"}</IonItem>
-            {/* End Access Level Radio Group */}
-            {/* Registration Submit Button */}
-            <IonButton
-              expand="block"
-              type="submit"
-              onClick={(event: any) => {
-                registrationBtnHandler(event);
-              }}
-            >
-              Submit Registration
-            </IonButton>
-            {/* End Content */}
-          </IonCardContent>
-        </IonCard>
-        <IonToast
-          isOpen={inputToastError}
-          onDidDismiss={() => setInputToastError(false)}
-          message="Please enter all information and in a valid format."
-          duration={2500}
-        />
-        <IonToast
-          isOpen={registrationSuccessfulToast}
-          onDidDismiss={() => setRegistrationSuccessfulToast(false)}
-          message="Registration Successful!"
-          duration={2500}
-        />
-      </IonContent>
-    </IonPage>
-  );
+                <IonItem>
+                  <IonLabel>Administrator</IonLabel>
+                  <IonRadio slot="start" value="Administrator" />
+                </IonItem>
+
+                <IonItem>
+                  <IonLabel>Root</IonLabel>
+                  <IonRadio slot="start" value="Root" />
+                </IonItem>
+              </IonRadioGroup>
+              <IonItemDivider>Your Requested Access Level:</IonItemDivider>
+              <IonItem>{selected ?? "(none selected"}</IonItem>
+              {/* End Access Level Radio Group */}
+              {/* Registration Submit Button */}
+              <IonButton
+                expand="block"
+                type="submit"
+                onClick={(event: any) => {
+                  registrationBtnHandler(event);
+                }}
+              >
+                Submit Registration
+              </IonButton>
+              {/* End Content */}
+            </IonCardContent>
+          </IonCard>
+          <IonToast
+            isOpen={inputToastError}
+            onDidDismiss={() => setInputToastError(false)}
+            message="Please enter all information and in a valid format."
+            duration={2500}
+          />
+          <IonToast
+            isOpen={registrationSuccessfulToast}
+            onDidDismiss={() => setRegistrationSuccessfulToast(false)}
+            message="Registration Successful!"
+            duration={2500}
+          />
+        </IonContent>
+      </IonPage>
+    );
+  } else if (registrationSuccess === true && registrationInProgress === false) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Registration</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Registration Request Successful</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              Once you have verified your account via email, which you should
+              receive soon, and your account has been approved. Then you will be
+              able to login.
+            </IonCardContent>
+          </IonCard>
+        </IonContent>
+      </IonPage>
+    );
+  } else if (registrationSuccess === false && registrationInProgress === true) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Registration</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <IonCard>
+            <IonCardContent>
+              Sending Registration
+              <IonProgressBar type="indeterminate"></IonProgressBar>
+            </IonCardContent>
+          </IonCard>
+        </IonContent>
+      </IonPage>
+    );
+  } else {
+    return <IonPage></IonPage>;
+  }
 };
