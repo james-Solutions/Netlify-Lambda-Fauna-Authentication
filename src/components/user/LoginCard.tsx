@@ -22,6 +22,8 @@ import {
   loginRequest,
   getIsAuth,
   getSendingLogin,
+  getLoginError,
+  getLoginErrorMessage,
 } from "../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -29,6 +31,8 @@ export const LoginCard: React.FC = () => {
   const dispatch = useDispatch();
   const isAuth = useSelector(getIsAuth);
   const sendingLogin = useSelector(getSendingLogin);
+  const loginError = useSelector(getLoginError);
+  const loginErrorMessage = useSelector(getLoginErrorMessage);
 
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
@@ -83,7 +87,7 @@ export const LoginCard: React.FC = () => {
 
   if (isAuth) {
     return <Redirect to="/home" />;
-  } else if (sendingLogin === false) {
+  } else {
     return (
       <IonPage>
         <IonHeader>
@@ -139,10 +143,23 @@ export const LoginCard: React.FC = () => {
                 onClick={(event: any) => {
                   loginBtnHandler(event);
                 }}
+                disabled={sendingLogin}
               >
-                Submit Login
+                {loginError ? "Retry Login" : "Submit Login"}
               </IonButton>
               {/* End Content */}
+              {sendingLogin ? (
+                <IonProgressBar type="indeterminate"></IonProgressBar>
+              ) : (
+                <div />
+              )}
+              {loginError ? (
+                <IonItem>
+                  <IonLabel>{loginErrorMessage}</IonLabel>
+                </IonItem>
+              ) : (
+                <div />
+              )}
             </IonCardContent>
           </IonCard>
           <IonToast
@@ -160,27 +177,5 @@ export const LoginCard: React.FC = () => {
         </IonContent>
       </IonPage>
     );
-  } else if (sendingLogin === true) {
-    return (
-      <IonPage>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>Login</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>Sending Login Request</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              <IonProgressBar type="indeterminate"></IonProgressBar>
-            </IonCardContent>
-          </IonCard>
-        </IonContent>
-      </IonPage>
-    );
-  } else {
-    return <IonPage></IonPage>;
   }
 };

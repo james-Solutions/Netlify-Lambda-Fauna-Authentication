@@ -29,6 +29,8 @@ const initialState = {
   registrationSuccess: false,
   sendingRegistration: false,
   sendingLogin: false,
+  loginError: false,
+  loginErrorMessage: "",
 };
 
 // Redux Slice
@@ -43,6 +45,8 @@ const userSlice = createSlice({
       state.user.username = username;
       state.user.secret = secret;
       state.sendingLogin = false;
+      state.loginError = false;
+      state.loginErrorMessage = "";
       sessionStorage.setItem(
         "user-info",
         JSON.stringify({
@@ -51,6 +55,11 @@ const userSlice = createSlice({
           secret: state.user.secret,
         })
       );
+    },
+    loginFailure: (state, action: PayloadAction<string>) => {
+      state.sendingLogin = false;
+      state.loginError = true;
+      state.loginErrorMessage = action.payload;
     },
     logOutSuccessful: (state) => {
       console.log("clearing");
@@ -69,6 +78,8 @@ const userSlice = createSlice({
     },
     updateSendingLogin: (state, action: PayloadAction<boolean>) => {
       state.sendingLogin = action.payload;
+      state.loginError = !action.payload;
+      state.loginErrorMessage = "";
     },
   },
 });
@@ -76,6 +87,7 @@ const userSlice = createSlice({
 // Actions
 export const {
   loginSuccessful,
+  loginFailure,
   logOutSuccessful,
   registrationSuccessful,
   updateSendingRegistration,
@@ -90,6 +102,9 @@ export const getRegistrationSuccess = (state: RootState) =>
 export const getSendingRegistration = (state: RootState) =>
   state.user.sendingRegistration;
 export const getSendingLogin = (state: RootState) => state.user.sendingLogin;
+export const getLoginError = (state: RootState) => state.user.loginError;
+export const getLoginErrorMessage = (state: RootState) =>
+  state.user.loginErrorMessage;
 
 export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   dispatch
@@ -154,8 +169,7 @@ export const loginRequest = (user: LoginRequestUser): AppThunk => (
               })
             );
           } else {
-            console.log(response.message);
-            console.log(response.description);
+            dispatch(loginFailure(response.description));
           }
         })
         .catch((error) => {
