@@ -13,7 +13,7 @@ import {
 } from "@ionic/react";
 import { Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getIsAuth, logOutUser } from "../../redux/slices/serverSlice";
+import { getIsAuth, logOutUser } from "../../redux/slices/userSlice";
 
 export const Logout: React.FC = () => {
   const dispatch = useDispatch();

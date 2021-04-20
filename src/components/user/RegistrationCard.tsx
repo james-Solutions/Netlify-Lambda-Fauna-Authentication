@@ -25,7 +25,7 @@ import {
   registrationRequest,
   getRegistrationSuccess,
   getSendingRegistration,
-} from "../../redux/slices/serverSlice";
+} from "../../redux/slices/userSlice";
 
 export const RegistrationCard: React.FC = () => {
   const dispatch = useDispatch();

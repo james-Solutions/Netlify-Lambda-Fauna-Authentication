@@ -32,8 +32,8 @@ const initialState = {
 };
 
 // Redux Slice
-const serverSlice = createSlice({
-  name: "server",
+const userSlice = createSlice({
+  name: "user",
   initialState,
   reducers: {
     loginSuccessful: (state, action: PayloadAction<LoggedInUser>) => {
@@ -80,16 +80,16 @@ export const {
   registrationSuccessful,
   updateSendingRegistration,
   updateSendingLogin,
-} = serverSlice.actions;
+} = userSlice.actions;
 
 // Selectors
-export const getIsAuth = (state: RootState) => state.server.isAuth;
-export const getUser = (state: RootState) => state.server.user;
+export const getIsAuth = (state: RootState) => state.user.isAuth;
+export const getUser = (state: RootState) => state.user.user;
 export const getRegistrationSuccess = (state: RootState) =>
-  state.server.registrationSuccess;
+  state.user.registrationSuccess;
 export const getSendingRegistration = (state: RootState) =>
-  state.server.sendingRegistration;
-export const getSendingLogin = (state: RootState) => state.server.sendingLogin;
+  state.user.sendingRegistration;
+export const getSendingLogin = (state: RootState) => state.user.sendingLogin;
 
 export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   dispatch
@@ -191,4 +191,4 @@ export const logOutUser = (): AppThunk => (dispatch) => {
   );
 };
 
-export default serverSlice.reducer;
+export default userSlice.reducer;

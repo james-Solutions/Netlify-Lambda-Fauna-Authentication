@@ -22,7 +22,7 @@ import {
   loginRequest,
   getIsAuth,
   getSendingLogin,
-} from "../../redux/slices/serverSlice";
+} from "../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 export const LoginCard: React.FC = () => {
