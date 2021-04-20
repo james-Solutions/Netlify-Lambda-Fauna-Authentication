@@ -15,3 +15,7 @@ export interface RegistrationRequest {
   password: string;
   accessLevel: string;
 }
+
+export interface VerifyUser {
+  email: string;
+}

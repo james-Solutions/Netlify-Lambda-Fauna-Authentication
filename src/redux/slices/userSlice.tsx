@@ -5,6 +5,7 @@ import {
   LoggedInUser,
   LoginRequestUser,
   RegistrationRequest,
+  VerifyUser,
 } from "../interfaces/interfaces";
 
 let apiUrl = "/.netlify/functions";
@@ -31,6 +32,7 @@ const initialState = {
   sendingLogin: false,
   loginError: false,
   loginErrorMessage: "",
+  verificationCode: 0,
 };
 
 // Redux Slice
@@ -81,6 +83,9 @@ const userSlice = createSlice({
       state.loginError = !action.payload;
       state.loginErrorMessage = "";
     },
+    setVerificationCode: (state, action: PayloadAction<number>) => {
+      state.verificationCode = action.payload;
+    },
   },
 });
 
@@ -92,6 +97,7 @@ export const {
   registrationSuccessful,
   updateSendingRegistration,
   updateSendingLogin,
+  setVerificationCode,
 } = userSlice.actions;
 
 // Selectors
@@ -105,6 +111,8 @@ export const getSendingLogin = (state: RootState) => state.user.sendingLogin;
 export const getLoginError = (state: RootState) => state.user.loginError;
 export const getLoginErrorMessage = (state: RootState) =>
   state.user.loginErrorMessage;
+export const getVerificationCode = (state: RootState) =>
+  state.user.verificationCode;
 
 export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   dispatch
@@ -196,6 +204,34 @@ export const logOutUser = (): AppThunk => (dispatch) => {
         if (response.message === "Success") {
         } else {
           console.log("Could not logout");
+        }
+      });
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
+};
+
+export const fetchVerificationCode = (user: VerifyUser): AppThunk => (
+  dispatch
+) => {
+  // Fetch
+  fetch(`${apiUrl}/verify`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: user.email,
+    }),
+  }).then(
+    (resRaw) => {
+      resRaw.json().then((response) => {
+        if (response.message === "Success") {
+          dispatch(setVerificationCode(response.code));
+        } else {
+          console.log("Could not find email with code");
         }
       });
     },

@@ -74,7 +74,6 @@ exports.handler = (event, context, callback) => {
                 recipients: [{ address: userData.email }],
               })
               .then((data) => {
-                console.log(data);
                 return callback(null, {
                   statusCode: 200,
                   headers: headers,

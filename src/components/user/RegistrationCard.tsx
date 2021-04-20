@@ -308,6 +308,8 @@ export const RegistrationCard: React.FC = () => {
               <IonCardTitle>Registration Request Successful</IonCardTitle>
             </IonCardHeader>
             <IonCardContent>
+              You must now verify your email account. An email will be sent with
+              a one time code that lasts 24 hours to complete your verification.
               Once you have verified your account via email, which you should
               receive soon, and your account has been approved. Then you will be
               able to login.
