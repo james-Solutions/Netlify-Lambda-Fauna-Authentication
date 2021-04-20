@@ -27,7 +27,7 @@ import {
 } from "../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-export const LoginCard: React.FC = () => {
+export const Login: React.FC = () => {
   const dispatch = useDispatch();
   const isAuth = useSelector(getIsAuth);
   const sendingLogin = useSelector(getSendingLogin);

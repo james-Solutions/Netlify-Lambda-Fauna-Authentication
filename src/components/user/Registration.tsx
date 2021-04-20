@@ -27,7 +27,7 @@ import {
   getSendingRegistration,
 } from "../../redux/slices/userSlice";
 
-export const RegistrationCard: React.FC = () => {
+export const Registration: React.FC = () => {
   const dispatch = useDispatch();
   const registrationSuccess = useSelector(getRegistrationSuccess);
   const registrationInProgress = useSelector(getSendingRegistration);

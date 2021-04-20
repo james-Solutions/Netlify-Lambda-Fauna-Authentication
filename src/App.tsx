@@ -6,8 +6,8 @@ import { Redirect, Route } from "react-router-dom";
 // Component Imports
 import Menu from "./components/Menu";
 import { Home } from "./components/scheduler/Home";
-import { RegistrationCard } from "./components/user/RegistrationCard";
-import { LoginCard } from "./components/user/LoginCard";
+import { Registration } from "./components/user/Registration";
+import { Login } from "./components/user/Login";
 import { Logout } from "./components/user/Logout";
 import { Verify } from "./components/user/Verify";
 
@@ -44,13 +44,13 @@ const App: React.FC = () => {
               <Home />
             </Route>
             <Route path="/user/login" exact={true}>
-              <LoginCard />
+              <Login />
             </Route>
             <Route path="/user/logout" exact={true}>
               <Logout />
             </Route>
             <Route path="/user/register" exact={true}>
-              <RegistrationCard />
+              <Registration />
             </Route>
             <Route path="/user/verify/:email" component={Verify} />
           </IonRouterOutlet>
