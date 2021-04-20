@@ -115,22 +115,26 @@ async function loginAndGetToken(userData) {
 }
 
 async function getUserData(email) {
-  let helper = client.paginate(
-    query.Match(query.Index("users_by_email"), email)
-  );
-  const response = {
-    verified: false,
-    approved: false,
-  };
-  helper
-    .map((ref) => {
-      return query.Get(ref);
-    })
-    .each((page) => {
-      if (page.length > 0) {
-        response.verified = page[0].data.verified;
-        response.approved = page[0].data.approved;
-      }
-    });
-  return response;
+  return new Promise((resolve, reject) => {
+    let helper = client.paginate(
+      query.Match(query.Index("users_by_email"), email)
+    );
+    const response = {
+      verified: false,
+      approved: false,
+    };
+    helper
+      .map((ref) => {
+        return query.Get(ref);
+      })
+      .each((page) => {
+        if (page.length > 0) {
+          response.verified = page[0].data.verified;
+          response.approved = page[0].data.approved;
+        }
+      })
+      .then(() => {
+        resolve(response);
+      });
+  });
 }
