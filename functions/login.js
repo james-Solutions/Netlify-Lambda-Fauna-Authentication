@@ -1,5 +1,6 @@
 const faunadb = require("faunadb");
-const { get } = require("request-promise");
+const { getUserVerifyApprove, loginAndGetToken } = require("../api-utils/User");
+const constants = require("../api-utils/constants");
 
 /* configure faunaDB Client with our secret */
 const query = faunadb.query;
@@ -17,14 +18,14 @@ exports.handler = (event, context, callback) => {
   if (event.httpMethod === "POST") {
     const postData = JSON.parse(event.body);
     // First we need to see if the user is verified and approved
-    getUserData(postData.email)
+    getUserVerifyApprove(postData.email)
       .then((response) => {
         if (response.verified === false) {
           return callback(null, {
             statusCode: 200,
             headers,
             body: JSON.stringify({
-              message: "Failure",
+              message: constants.STATUS.FAILURE,
               description: "User has not verified their email.",
             }),
           });
@@ -33,7 +34,7 @@ exports.handler = (event, context, callback) => {
             statusCode: 200,
             headers,
             body: JSON.stringify({
-              message: "Failure",
+              message: constants.STATUS.FAILURE,
               description: "User has not approved to login.",
             }),
           });
@@ -49,7 +50,7 @@ exports.handler = (event, context, callback) => {
                 statusCode: 200,
                 headers,
                 body: JSON.stringify({
-                  message: "Success",
+                  message: constants.STATUS.SUCCESS,
                   secret: response.secret,
                 }),
               });
@@ -81,13 +82,13 @@ exports.handler = (event, context, callback) => {
           return callback(null, {
             statusCode: 200,
             headers,
-            body: JSON.stringify({ message: "Success" }),
+            body: JSON.stringify({ message: constants.STATUS.SUCCESS }),
           });
         } else {
           return callback(null, {
             statusCode: 200,
             headers,
-            body: JSON.stringify({ message: "Failure" }),
+            body: JSON.stringify({ message: constants.STATUS.FAILURE }),
           });
         }
       })
@@ -95,7 +96,7 @@ exports.handler = (event, context, callback) => {
         return callback(null, {
           statusCode: 400,
           headers,
-          body: JSON.stringify({ message: "Failure" }),
+          body: JSON.stringify({ message: constants.STATUS.FAILURE }),
         });
       });
   } else {
@@ -106,35 +107,3 @@ exports.handler = (event, context, callback) => {
     });
   }
 };
-
-async function loginAndGetToken(userData) {
-  const { email, password } = userData;
-  return client.query(
-    query.Login(query.Match(query.Index("users_by_email"), email), { password })
-  );
-}
-
-async function getUserData(email) {
-  return new Promise((resolve, reject) => {
-    let helper = client.paginate(
-      query.Match(query.Index("users_by_email"), email)
-    );
-    const response = {
-      verified: false,
-      approved: false,
-    };
-    helper
-      .map((ref) => {
-        return query.Get(ref);
-      })
-      .each((page) => {
-        if (page.length > 0) {
-          response.verified = page[0].data.verified;
-          response.approved = page[0].data.approved;
-        }
-      })
-      .then(() => {
-        resolve(response);
-      });
-  });
-}

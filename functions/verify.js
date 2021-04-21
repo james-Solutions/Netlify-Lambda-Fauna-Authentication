@@ -1,10 +1,13 @@
-const faunadb = require("faunadb");
+const {
+  updateUserVerification,
+  deleteUserCode,
+  getUserVerificationCode,
+  getUserVerifyApprove,
+  createUserCode,
+} = require("../api-utils/User");
+const constants = require("../api-utils/constants");
 
 /* configure faunaDB & Sparkpost Client with our secrets */
-const query = faunadb.query;
-const clientFauna = new faunadb.Client({
-  secret: process.env.REACT_APP_FAUNA_SECRET,
-});
 
 const headers = {
   "Access-Control-Allow-Headers": "Content-Type",
@@ -18,13 +21,13 @@ exports.handler = (event, context, callback) => {
     if (userData.email && userData.code) {
       updateUserVerification(userData.email)
         .then((response) => {
-          if (response === "Success") {
+          if (response === constants.STATUS.SUCCESS) {
             deleteUserCode(userData.email)
               .then((response) => {
                 return callback(null, {
                   statusCode: 200,
                   headers: headers,
-                  body: JSON.stringify({ message: "Success" }),
+                  body: JSON.stringify({ message: constants.STATUS.SUCCESS }),
                 });
               })
               .catch((error) => {
@@ -32,7 +35,7 @@ exports.handler = (event, context, callback) => {
                   statusCode: 200,
                   headers: headers,
                   body: JSON.stringify({
-                    message: "Failure",
+                    message: constants.STATUS.FAILURE,
                     description: error,
                   }),
                 });
@@ -42,7 +45,7 @@ exports.handler = (event, context, callback) => {
               statusCode: 200,
               headers: headers,
               body: JSON.stringify({
-                message: "Failure",
+                message: constants.STATUS.FAILURE,
                 description: response,
               }),
             });
@@ -52,7 +55,10 @@ exports.handler = (event, context, callback) => {
           return callback(null, {
             statusCode: 200,
             headers: headers,
-            body: JSON.stringify({ message: "Failure", description: error }),
+            body: JSON.stringify({
+              message: constants.STATUS.FAILURE,
+              description: error,
+            }),
           });
         });
     } else {
@@ -61,15 +67,65 @@ exports.handler = (event, context, callback) => {
           return callback(null, {
             statusCode: 200,
             headers: headers,
-            body: JSON.stringify({ message: "Success", code: response }),
+            body: JSON.stringify({
+              message: constants.STATUS.SUCCESS,
+              code: response,
+            }),
           });
         })
         .catch((error) => {
-          return callback(null, {
-            statusCode: 200,
-            headers: headers,
-            body: JSON.stringify({ message: "Failure", description: error }),
-          });
+          if (error === constants.USER_ERRORS.NO_CODE) {
+            getUserVerifyApprove(userData.email)
+              .then((response) => {
+                if (response.verified === true) {
+                  return callback(null, {
+                    statusCode: 200,
+                    headers: headers,
+                    body: JSON.stringify({
+                      message: constants.STATUS.FAILURE,
+                      description: constants.USER_ERRORS.ALREADY_VERIFIED,
+                    }),
+                  });
+                } else {
+                  // Should we just make a new code?
+                  const code = Math.floor(100000 + Math.random() * 900000);
+                  createUserCode(userData.email, code)
+                    .then((response) => {
+                      return callback(null, {
+                        statusCode: 200,
+                        headers: headers,
+                        body: JSON.stringify({
+                          message: constants.STATUS.SUCCESS,
+                          description: constants.USER_ERRORS.NO_CODE_UNVERIFIED,
+                          code: code,
+                        }),
+                      });
+                    })
+                    .catch((error) => {
+                      return callback(null, {
+                        statusCode: 200,
+                        headers: headers,
+                        body: JSON.stringify({
+                          message: constants.STATUS.FAILURE,
+                          description: error,
+                        }),
+                      });
+                    });
+                }
+              })
+              .catch((error) => {
+                if (error === constants.USER_ERRORS.USER_DOES_NOT_EXIST) {
+                  return callback(null, {
+                    statusCode: 200,
+                    headers: headers,
+                    body: JSON.stringify({
+                      message: constants.STATUS.FAILURE,
+                      description: error,
+                    }),
+                  });
+                }
+              });
+          }
         });
     }
   } else {
@@ -80,75 +136,3 @@ exports.handler = (event, context, callback) => {
     });
   }
 };
-
-async function getUserVerificationCode(email) {
-  return new Promise((resolve, reject) => {
-    let helper = clientFauna.paginate(
-      query.Match(query.Index("users_codes_by_email"), email)
-    );
-    let response;
-    helper
-      .map((ref) => {
-        return query.Get(ref);
-      })
-      .each((page) => {
-        if (page.length > 0) {
-          response = page[0].data.code;
-        }
-      })
-      .then(() => {
-        if (response === undefined) {
-          reject("User has does not a verification code");
-        } else {
-          resolve(response);
-        }
-      });
-  });
-}
-
-async function updateUserVerification(email) {
-  return new Promise((resolve, reject) => {
-    clientFauna
-      .query(
-        query.Update(
-          query.Select(
-            ["ref"],
-            query.Get(query.Match(query.Index("users_by_email"), email))
-          ),
-          {
-            data: {
-              verified: true,
-            },
-          }
-        )
-      )
-      .then((response) => {
-        resolve("Success");
-      })
-
-      .catch((error) => {
-        reject(error);
-      });
-  });
-}
-
-async function deleteUserCode(email) {
-  return new Promise((resolve, reject) => {
-    clientFauna
-      .query(
-        query.Delete(
-          query.Select(
-            ["ref"],
-            query.Get(query.Match(query.Index("users_codes_by_email"), email))
-          )
-        )
-      )
-      .then((response) => {
-        resolve("Success");
-      })
-
-      .catch((error) => {
-        reject(error);
-      });
-  });
-}
