@@ -135,7 +135,18 @@ export const Login: React.FC = () => {
                 ></IonInput>
               </IonItem>
               {/* End Login Credential User Information */}
-
+              {sendingLogin ? (
+                <IonProgressBar type="indeterminate"></IonProgressBar>
+              ) : (
+                <div />
+              )}
+              {loginError ? (
+                <IonItem>
+                  <IonLabel color="danger">{loginErrorMessage}</IonLabel>
+                </IonItem>
+              ) : (
+                <div />
+              )}
               {/* Login Submit Button */}
               <IonButton
                 expand="block"
@@ -148,18 +159,6 @@ export const Login: React.FC = () => {
                 {loginError ? "Retry Login" : "Submit Login"}
               </IonButton>
               {/* End Content */}
-              {sendingLogin ? (
-                <IonProgressBar type="indeterminate"></IonProgressBar>
-              ) : (
-                <div />
-              )}
-              {loginError ? (
-                <IonItem>
-                  <IonLabel>{loginErrorMessage}</IonLabel>
-                </IonItem>
-              ) : (
-                <div />
-              )}
             </IonCardContent>
           </IonCard>
           <IonToast

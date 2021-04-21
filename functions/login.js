@@ -1,5 +1,9 @@
 const faunadb = require("faunadb");
-const { getUserVerifyApprove, loginAndGetToken } = require("../api-utils/User");
+const {
+  getUserVerifyApprove,
+  loginAndGetToken,
+  getUserData,
+} = require("../api-utils/User");
 const constants = require("../api-utils/constants");
 
 /* configure faunaDB Client with our secret */
@@ -40,40 +44,57 @@ exports.handler = (event, context, callback) => {
             password: postData.password,
           })
             .then((response) => {
-              // What data do we get? Access level?
-              console.log(response);
+              getUserData(postData.email)
+                .then((user) => {
+                  return callback(null, {
+                    statusCode: 200,
+                    headers: constants.HEADERS,
+                    body: JSON.stringify({
+                      message: constants.STATUS.SUCCESS,
+                      secret: response.secret,
+                      username: user.username,
+                      accessLevel: user.accessLevel,
+                    }),
+                  });
+                })
+                .catch((error) => {
+                  return callback(null, {
+                    statusCode: 200,
+                    headers: constants.HEADERS,
+                    body: JSON.stringify({
+                      message: constants.STATUS.FAILURE,
+                      description: error.description,
+                    }),
+                  });
+                });
+            })
+            .catch((error) => {
               return callback(null, {
                 statusCode: 200,
                 headers: constants.HEADERS,
                 body: JSON.stringify({
-                  message: constants.STATUS.SUCCESS,
-                  secret: response.secret,
-                }),
-              });
-            })
-            .catch((error) => {
-              console.log(error);
-              const jsonData = JSON.parse(error);
-              return callback(null, {
-                statusCode: jsonData.requestResult.statusCode,
-                headers: constants.HEADERS,
-                body: JSON.stringify({
-                  message: jsonData.message,
-                  description: jsonData.description,
+                  message: constants.STATUS.FAILURE,
+                  description: error.description,
                 }),
               });
             });
         }
       })
       .catch((error) => {
-        console.log(error);
+        return callback(null, {
+          statusCode: 200,
+          headers: constants.HEADERS,
+          body: JSON.stringify({
+            message: constants.STATUS.FAILURE,
+            description: error,
+          }),
+        });
       });
   } else if (event.httpMethod === "GET") {
     client
       .query(query.Logout(false))
       .then((response) => {
-        console.log(response);
-        if (response === true) {
+        if (response === false) {
           return callback(null, {
             statusCode: 200,
             headers: constants.HEADERS,

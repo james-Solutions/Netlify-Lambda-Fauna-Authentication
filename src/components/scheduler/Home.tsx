@@ -35,7 +35,9 @@ export const Home: React.FC = () => {
         </IonHeader>
         <IonContent>
           <IonCard>
-            <IonCardHeader>Welcome {user.username}</IonCardHeader>
+            <IonCardHeader>
+              Welcome {user.username} - Logged in as: {user.accessLevel}
+            </IonCardHeader>
             <IonCardContent>
               Authentication: {isAuth ? "Authenticated" : "Not Authenticated"}
             </IonCardContent>
