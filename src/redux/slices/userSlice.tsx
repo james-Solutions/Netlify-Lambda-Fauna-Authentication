@@ -36,6 +36,7 @@ const initialState = {
   verificationSuccess: false,
   verificationError: false,
   verificationErrorMessage: "",
+  verificationSending: false,
 };
 
 // Redux Slice
@@ -94,10 +95,17 @@ const userSlice = createSlice({
       state.verificationError = false;
       state.verificationErrorMessage = "";
       state.verificationSuccess = true;
+      state.verificationSending = false;
     },
     setVerificationFailure: (state, action: PayloadAction<string>) => {
       state.verificationError = true;
+      state.verificationSending = false;
       state.verificationErrorMessage = action.payload;
+    },
+    setVerificationSending: (state, action: PayloadAction<boolean>) => {
+      state.verificationError = false;
+      state.verificationErrorMessage = "";
+      state.verificationSending = action.payload;
     },
   },
 });
@@ -113,6 +121,7 @@ export const {
   setVerificationCode,
   setVerificationSuccess,
   setVerificationFailure,
+  setVerificationSending,
 } = userSlice.actions;
 
 // Selectors
@@ -134,6 +143,8 @@ export const getVerificationError = (state: RootState) =>
   state.user.verificationError;
 export const getVerificationErrorMessage = (state: RootState) =>
   state.user.verificationErrorMessage;
+export const getVerificationSending = (state: RootState) =>
+  state.user.verificationSending;
 
 export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   dispatch
@@ -252,7 +263,7 @@ export const fetchVerificationCode = (user: VerifyUser): AppThunk => (
         if (response.message === "Success") {
           dispatch(setVerificationCode(response.code));
         } else {
-          console.log("Could not find email with code");
+          dispatch(setVerificationFailure(response.description));
         }
       });
     },
@@ -266,6 +277,7 @@ export const verifyVerificationCode = (user: {
   email: string;
   code: number;
 }): AppThunk => (dispatch) => {
+  dispatch(setVerificationSending(true));
   // Fetch
   fetch(`${apiUrl}/verify`, {
     method: "POST",

@@ -65,7 +65,7 @@ exports.handler = (event, context, callback) => {
                   <html>
                     <body>
                       <p>Thank you for signing up for the Student Scheduler Planner (SSP).</p>
-                      <p>Please <a href=${domainUrl}/${userData.email}>click me</a> to verify your email.</p>
+                      <p>Please <a href=${domainUrl}/user/verify/${userData.email}>click me</a> to verify your email.</p>
                       <p>Use code <span style="color:red">${code}</span> to complete your verification.</p>
                       <p>Once your account has been verified and approved, you will be able to login.</p>
                     </body>

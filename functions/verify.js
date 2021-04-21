@@ -97,7 +97,11 @@ async function getUserVerificationCode(email) {
         }
       })
       .then(() => {
-        resolve(response);
+        if (response === undefined) {
+          reject("User has does not a verification code");
+        } else {
+          resolve(response);
+        }
       });
   });
 }
