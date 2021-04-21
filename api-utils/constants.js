@@ -4,11 +4,14 @@ export const USER_ERRORS = {
   NO_CODE_UNVERIFIED: "Generated new code, check email to obtain it",
   USER_DOES_NOT_EXIST: "No user with the supplied email exists in the database",
   CODE_DOES_NOT_MATCH: "The code you entered is not correct",
+  USER_NOT_APPROVED: "User has not approved to login",
+  USER_NOT_VERIFIED: "User has not verified their email",
 };
 
 export const STATUS = {
   SUCCESS: "Success",
   FAILURE: "Failure",
+  ALIVE: "Alive",
 };
 
 export const URL = {

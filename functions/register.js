@@ -4,11 +4,7 @@ const {
   sendVerifyCode,
   generateCode,
 } = require("../api-utils/User");
-const SparkPost = require("sparkpost");
 const constants = require("../api-utils/constants");
-
-/* configure parkpost Client with our secrets */
-const clientSparkpost = new SparkPost(process.env.REACT_APP_SPARKPOST);
 
 const headers = {
   "Access-Control-Allow-Headers": "Content-Type",
@@ -74,7 +70,7 @@ exports.handler = (event, context, callback) => {
     return callback(null, {
       statusCode: 200,
       headers: headers,
-      body: JSON.stringify({ message: "Alive" }),
+      body: JSON.stringify({ message: constants.STATUS.ALIVE }),
     });
   }
 };

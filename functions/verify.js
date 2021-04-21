@@ -159,7 +159,7 @@ exports.handler = (event, context, callback) => {
     return callback(null, {
       statusCode: 200,
       headers: headers,
-      body: JSON.stringify({ message: "Alive" }),
+      body: JSON.stringify({ message: constants.STATUS.ALIVE }),
     });
   }
 };

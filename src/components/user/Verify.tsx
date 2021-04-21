@@ -92,7 +92,7 @@ export const Verify: React.FC<Props> = (props: Props) => {
                   onIonChange={(event) => setInputCode(event.detail.value!)}
                   type="text"
                   required={true}
-                  disabled={sendingVerification || error}
+                  disabled={sendingVerification || error || !verificationCode}
                 ></IonInput>
               </IonItem>
               {sendingVerification === true ? (
@@ -123,7 +123,7 @@ export const Verify: React.FC<Props> = (props: Props) => {
               <IonButton
                 expand="block"
                 type="submit"
-                disabled={sendingVerification || error}
+                disabled={sendingVerification || error || !verificationCode}
                 onClick={(event: any) => {
                   btnCodeSubmitHandler(event);
                 }}
@@ -152,11 +152,11 @@ export const Verify: React.FC<Props> = (props: Props) => {
             </IonCardHeader>
             <IonCardContent>
               <IonItem>
-                Your account is now verified. If it is approved as well, you may
-                login{" "}
-                <a style={{ display: "inline-block" }} href="/user/login">
-                  here
-                </a>
+                Your account is now verified. If it is{" "}
+                <u style={{ display: "contents" }}>
+                  <b style={{ display: "contents" }}>approved</b>
+                </u>{" "}
+                as well, you may login.
               </IonItem>
             </IonCardContent>
           </IonCard>

@@ -26,7 +26,7 @@ exports.handler = (event, context, callback) => {
             headers,
             body: JSON.stringify({
               message: constants.STATUS.FAILURE,
-              description: "User has not verified their email.",
+              description: constants.USER_ERRORS.USER_NOT_VERIFIED,
             }),
           });
         } else if (response.approved === false) {
@@ -35,7 +35,7 @@ exports.handler = (event, context, callback) => {
             headers,
             body: JSON.stringify({
               message: constants.STATUS.FAILURE,
-              description: "User has not approved to login.",
+              description: constants.USER_ERRORS.USER_NOT_APPROVED,
             }),
           });
         } else {
@@ -46,6 +46,8 @@ exports.handler = (event, context, callback) => {
             password: postData.password,
           })
             .then((response) => {
+              // What data do we get? Access level?
+              console.log(response);
               return callback(null, {
                 statusCode: 200,
                 headers,
@@ -56,7 +58,6 @@ exports.handler = (event, context, callback) => {
               });
             })
             .catch((error) => {
-              console.log("Error!");
               console.log(error);
               const jsonData = JSON.parse(error);
               return callback(null, {
@@ -103,7 +104,7 @@ exports.handler = (event, context, callback) => {
     return callback(null, {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ message: "I am alive" }),
+      body: JSON.stringify({ message: constants.STATUS.ALIVE }),
     });
   }
 };
