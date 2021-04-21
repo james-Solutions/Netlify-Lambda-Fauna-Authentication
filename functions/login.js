@@ -63,7 +63,7 @@ exports.handler = (event, context, callback) => {
                     headers: constants.HEADERS,
                     body: JSON.stringify({
                       message: constants.STATUS.FAILURE,
-                      secret: error.description,
+                      description: error.description,
                     }),
                   });
                 });
