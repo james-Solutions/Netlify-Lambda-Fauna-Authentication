@@ -7,6 +7,7 @@ export interface LoggedInUser {
   email: string;
   username: string;
   secret: string;
+  accessLevel: string;
 }
 
 export interface RegistrationRequest {

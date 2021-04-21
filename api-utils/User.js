@@ -170,6 +170,45 @@ export async function getUserVerifyApprove(email) {
 }
 
 /**
+ * getUserVerifyData - Returns an object containing two fields, verify and approve, based on the FaunaDB State.
+ * @param {string} email
+ * @returns {Promise} Promise from the Fauna Client
+ */
+export async function getUserData(email) {
+  return new Promise((resolve, reject) => {
+    let helper = clientFauna.paginate(
+      query.Match(query.Index("users_by_email"), email)
+    );
+    const response = {
+      email: "",
+      username: "",
+      accessLevel: "",
+      verified: false,
+      approved: false,
+    };
+    helper
+      .map((ref) => {
+        return query.Get(ref);
+      })
+      .each((page) => {
+        if (page.length > 0) {
+          response.email = page[0].data.email;
+          response.username = page[0].data.username;
+          response.accessLevel = page[0].data.accessLevel;
+          response.verified = page[0].data.verified;
+          response.approved = page[0].data.approved;
+        } else {
+          reject(constants.USER_ERRORS.USER_DOES_NOT_EXIST);
+        }
+      })
+      .then(() => {
+        resolve(response);
+      })
+      .catch((error) => reject(error));
+  });
+}
+
+/**
  * loginAndGetToken - Attempts to login the user and returns the result from the Fauna client that contains key value pairs about the user.
  * @param {object} userData
  * @returns {Promise} Promise from the Fauna Client in the form of an object with the key and other information

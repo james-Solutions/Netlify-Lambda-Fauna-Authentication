@@ -26,8 +26,14 @@ export const URL = {
       : "https://modest-cori-434d1e.netlify.app",
 };
 
-export const headers = {
+export const HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTION",
+};
+
+export const ACCESS_LEVELS = {
+  STUDENT: "Student",
+  ADMIN: "Admin",
+  ROOT: "Root",
 };

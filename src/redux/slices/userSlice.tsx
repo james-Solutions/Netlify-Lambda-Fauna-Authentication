@@ -8,6 +8,7 @@ import {
   VerifyUser,
 } from "../interfaces/interfaces";
 import * as constants from "../../constants";
+const cookie = require("react-cookies");
 
 let apiUrl = "/.netlify/functions";
 
@@ -15,23 +16,21 @@ if (process.env.REACT_APP_DEV === "true") {
   apiUrl = "http://localhost:9000" + apiUrl;
 }
 
-const data = sessionStorage.getItem("user-info");
-let sessionUserInfo = null;
-if (data !== null) {
-  sessionUserInfo = JSON.parse(data);
-}
+const cookieUserInfo = cookie.load("user-info");
+console.log(cookieUserInfo);
 
 const initialState = {
-  isAuth: sessionUserInfo !== null ? true : false,
+  isAuth: cookieUserInfo !== undefined ? true : false,
   user: {
-    email: sessionUserInfo !== null ? sessionUserInfo.email : "",
-    username: sessionUserInfo !== null ? sessionUserInfo.username : "",
-    secret: sessionUserInfo !== null ? sessionUserInfo.secret : "",
+    email: cookieUserInfo !== undefined ? cookieUserInfo.email : "",
+    username: cookieUserInfo !== undefined ? cookieUserInfo.username : "",
+    secret: cookieUserInfo !== undefined ? cookieUserInfo.secret : "",
+    accessLevel: cookieUserInfo !== undefined ? cookieUserInfo.accessLevel : "",
   },
   registrationSuccess: false,
   registrationSending: false,
   registrationErrorMessage: "",
-  sendingLogin: false,
+  loginSending: false,
   loginError: false,
   loginErrorMessage: "",
   verificationCode: 0,
@@ -47,30 +46,27 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     loginSuccessful: (state, action: PayloadAction<LoggedInUser>) => {
-      const { email, username, secret } = action.payload;
+      const { email, username, secret, accessLevel } = action.payload;
       state.isAuth = true;
       state.user.email = email;
       state.user.username = username;
+      state.user.accessLevel = accessLevel;
       state.user.secret = secret;
-      state.sendingLogin = false;
+      state.loginSending = false;
       state.loginError = false;
       state.loginErrorMessage = "";
-      sessionStorage.setItem(
-        "user-info",
-        JSON.stringify({
-          email: state.user.email,
-          username: state.user.username,
-          secret: state.user.secret,
-        })
-      );
+      cookie.save("user-info", state.user, {
+        path: "/",
+        maxAge: 21600,
+      });
     },
     loginFailure: (state, action: PayloadAction<string>) => {
-      state.sendingLogin = false;
+      state.loginSending = false;
       state.loginError = true;
       state.loginErrorMessage = action.payload;
     },
     logOutSuccessful: (state) => {
-      sessionStorage.clear();
+      cookie.remove("user-info", { path: "/" });
       state.isAuth = false;
       state.user.email = "";
       state.user.username = "";
@@ -89,7 +85,7 @@ const userSlice = createSlice({
       state.registrationSending = action.payload;
     },
     updateSendingLogin: (state, action: PayloadAction<boolean>) => {
-      state.sendingLogin = action.payload;
+      state.loginSending = action.payload;
       state.loginError = !action.payload;
       state.loginErrorMessage = "";
     },
@@ -144,7 +140,7 @@ export const getSendingRegistration = (state: RootState) =>
   state.user.registrationSending;
 export const getRegistrationErrorMessage = (state: RootState) =>
   state.user.registrationErrorMessage;
-export const getSendingLogin = (state: RootState) => state.user.sendingLogin;
+export const getSendingLogin = (state: RootState) => state.user.loginSending;
 export const getLoginError = (state: RootState) => state.user.loginError;
 export const getLoginErrorMessage = (state: RootState) =>
   state.user.loginErrorMessage;
@@ -216,8 +212,9 @@ export const loginRequest = (user: LoginRequestUser): AppThunk => (
             dispatch(
               loginSuccessful({
                 email: user.email,
-                username: user.email,
+                username: response.username,
                 secret: response.secret,
+                accessLevel: response.accessLevel,
               })
             );
           } else {

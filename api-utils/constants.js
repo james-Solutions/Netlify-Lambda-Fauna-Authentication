@@ -31,3 +31,9 @@ export const HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTION",
 };
+
+export const ACCESS_LEVELS = {
+  STUDENT: "Student",
+  ADMIN: "Admin",
+  ROOT: "Root",
+};
