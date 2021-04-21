@@ -16,7 +16,7 @@ import {
   IonInput,
   IonToast,
 } from "@ionic/react";
-import { getIsAuth, getUser } from "../../redux/slices/serverSlice";
+import { getIsAuth, getUser } from "../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 export const Home: React.FC = () => {

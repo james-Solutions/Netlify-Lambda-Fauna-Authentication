@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Redirect, useHistory } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import {
   IonContent,
   IonHeader,
@@ -15,15 +15,24 @@ import {
   IonButton,
   IonInput,
   IonToast,
+  IonProgressBar,
 } from "@ionic/react";
 
-import { sendLoginAsync, getIsAuth } from "../../redux/slices/serverSlice";
+import {
+  loginRequest,
+  getIsAuth,
+  getSendingLogin,
+  getLoginError,
+  getLoginErrorMessage,
+} from "../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-export const LoginCard: React.FC = () => {
-  const history = useHistory();
+export const Login: React.FC = () => {
   const dispatch = useDispatch();
   const isAuth = useSelector(getIsAuth);
+  const sendingLogin = useSelector(getSendingLogin);
+  const loginError = useSelector(getLoginError);
+  const loginErrorMessage = useSelector(getLoginErrorMessage);
 
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
@@ -44,10 +53,7 @@ export const LoginCard: React.FC = () => {
     ) {
       // Everything is sanitized!!!
       setInputToastError(false);
-      dispatch(sendLoginAsync({ email: email, password: password }));
-      setLoginSuccessfulToast(true);
-
-      clearAllInput();
+      dispatch(loginRequest({ email: email, password: password }));
     } else {
       setInputToastError(true);
     }
@@ -71,11 +77,6 @@ export const LoginCard: React.FC = () => {
 
   const passwordInputHandler = (inputPassword: string) => {
     setPassword(inputPassword);
-  };
-
-  const clearAllInput = () => {
-    setEmail("");
-    setPassword("");
   };
 
   const errorStyle = {
@@ -142,10 +143,23 @@ export const LoginCard: React.FC = () => {
                 onClick={(event: any) => {
                   loginBtnHandler(event);
                 }}
+                disabled={sendingLogin}
               >
-                Submit Login
+                {loginError ? "Retry Login" : "Submit Login"}
               </IonButton>
               {/* End Content */}
+              {sendingLogin ? (
+                <IonProgressBar type="indeterminate"></IonProgressBar>
+              ) : (
+                <div />
+              )}
+              {loginError ? (
+                <IonItem>
+                  <IonLabel>{loginErrorMessage}</IonLabel>
+                </IonItem>
+              ) : (
+                <div />
+              )}
             </IonCardContent>
           </IonCard>
           <IonToast

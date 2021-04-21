@@ -23,7 +23,7 @@ import {
 } from "ionicons/icons";
 import "./Menu.css";
 
-import { getIsAuth, getUser } from "../redux/slices/serverSlice";
+import { getIsAuth, getUser } from "../redux/slices/userSlice";
 import { useSelector } from "react-redux";
 
 interface AppPage {
