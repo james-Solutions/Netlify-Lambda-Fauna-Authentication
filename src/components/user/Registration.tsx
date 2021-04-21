@@ -25,12 +25,14 @@ import {
   registrationRequest,
   getRegistrationSuccess,
   getSendingRegistration,
+  getRegistrationErrorMessage,
 } from "../../redux/slices/userSlice";
 
 export const Registration: React.FC = () => {
   const dispatch = useDispatch();
   const registrationSuccess = useSelector(getRegistrationSuccess);
   const registrationInProgress = useSelector(getSendingRegistration);
+  const registrationError = useSelector(getRegistrationErrorMessage);
   const [email, setEmail] = useState<string>();
   const [username, setUsername] = useState<string>();
   const [password, setPassword] = useState<string>();
@@ -146,7 +148,7 @@ export const Registration: React.FC = () => {
     fontStyle: "italic",
   };
 
-  if (registrationSuccess === false && registrationInProgress === false) {
+  if (registrationSuccess === false) {
     return (
       <IonPage>
         <IonHeader>
@@ -165,6 +167,7 @@ export const Registration: React.FC = () => {
                 <IonLabel position="floating">Email</IonLabel>
                 <IonInput
                   value={email}
+                  disabled={registrationInProgress}
                   onIonChange={(event) =>
                     emailInputHandler(event.detail.value!)
                   }
@@ -183,6 +186,7 @@ export const Registration: React.FC = () => {
                 <IonLabel position="floating">Username</IonLabel>
                 <IonInput
                   value={username}
+                  disabled={registrationInProgress}
                   onIonChange={(event) =>
                     usernameInputHandler(event.detail.value!)
                   }
@@ -200,6 +204,7 @@ export const Registration: React.FC = () => {
                 <IonLabel position="floating">Password</IonLabel>
                 <IonInput
                   value={password}
+                  disabled={registrationInProgress}
                   onIonChange={(event) =>
                     passwordInputHandler(event.detail.value!)
                   }
@@ -221,6 +226,7 @@ export const Registration: React.FC = () => {
               <IonItem>
                 <IonLabel position="floating">Verify Password</IonLabel>
                 <IonInput
+                  disabled={registrationInProgress}
                   value={verifyPassword}
                   onIonChange={(event) =>
                     verifyPasswordInputHandler(event.detail.value!)
@@ -250,22 +256,49 @@ export const Registration: React.FC = () => {
 
                 <IonItem>
                   <IonLabel>Student</IonLabel>
-                  <IonRadio slot="start" value="Student" />
+                  <IonRadio
+                    disabled={registrationInProgress}
+                    slot="start"
+                    value="Student"
+                  />
                 </IonItem>
 
                 <IonItem>
                   <IonLabel>Administrator</IonLabel>
-                  <IonRadio slot="start" value="Administrator" />
+                  <IonRadio
+                    disabled={registrationInProgress}
+                    slot="start"
+                    value="Administrator"
+                  />
                 </IonItem>
 
                 <IonItem>
                   <IonLabel>Root</IonLabel>
-                  <IonRadio slot="start" value="Root" />
+                  <IonRadio
+                    disabled={registrationInProgress}
+                    slot="start"
+                    value="Root"
+                  />
                 </IonItem>
               </IonRadioGroup>
               <IonItemDivider>Your Requested Access Level:</IonItemDivider>
               <IonItem>{selected ?? "(none selected"}</IonItem>
               {/* End Access Level Radio Group */}
+              {registrationInProgress ? (
+                <IonItem>
+                  <IonLabel>Sending Registration</IonLabel>
+                  <IonProgressBar type="indeterminate"></IonProgressBar>
+                </IonItem>
+              ) : (
+                ""
+              )}
+              {registrationError ? (
+                <IonItem>
+                  <IonLabel color="danger">{registrationError}</IonLabel>
+                </IonItem>
+              ) : (
+                ""
+              )}
               {/* Registration Submit Button */}
               <IonButton
                 expand="block"
@@ -313,24 +346,6 @@ export const Registration: React.FC = () => {
               Once you have verified your account via email, which you should
               receive soon, and your account has been approved. Then you will be
               able to login.
-            </IonCardContent>
-          </IonCard>
-        </IonContent>
-      </IonPage>
-    );
-  } else if (registrationSuccess === false && registrationInProgress === true) {
-    return (
-      <IonPage>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>Registration</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          <IonCard>
-            <IonCardContent>
-              Sending Registration
-              <IonProgressBar type="indeterminate"></IonProgressBar>
             </IonCardContent>
           </IonCard>
         </IonContent>

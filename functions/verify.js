@@ -11,12 +11,6 @@ const constants = require("../api-utils/constants");
 
 /* configure faunaDB & Sparkpost Client with our secrets */
 
-const headers = {
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTION",
-};
-
 exports.handler = (event, context, callback) => {
   if (event.httpMethod === "POST") {
     const userData = JSON.parse(event.body);
@@ -28,14 +22,14 @@ exports.handler = (event, context, callback) => {
               .then((response) => {
                 return callback(null, {
                   statusCode: 200,
-                  headers: headers,
+                  headers: constants.HEADERS,
                   body: JSON.stringify({ message: constants.STATUS.SUCCESS }),
                 });
               })
               .catch((error) => {
                 return callback(null, {
                   statusCode: 200,
-                  headers: headers,
+                  headers: constants.HEADERS,
                   body: JSON.stringify({
                     message: constants.STATUS.FAILURE,
                     description: error,
@@ -45,7 +39,7 @@ exports.handler = (event, context, callback) => {
           } else {
             return callback(null, {
               statusCode: 200,
-              headers: headers,
+              headers: constants.HEADERS,
               body: JSON.stringify({
                 message: constants.STATUS.FAILURE,
                 description: response,
@@ -56,7 +50,7 @@ exports.handler = (event, context, callback) => {
         .catch((error) => {
           return callback(null, {
             statusCode: 200,
-            headers: headers,
+            headers: constants.HEADERS,
             body: JSON.stringify({
               message: constants.STATUS.FAILURE,
               description: error,
@@ -68,7 +62,7 @@ exports.handler = (event, context, callback) => {
         .then((response) => {
           return callback(null, {
             statusCode: 200,
-            headers: headers,
+            headers: constants.HEADERS,
             body: JSON.stringify({
               message: constants.STATUS.SUCCESS,
               code: response,
@@ -82,7 +76,7 @@ exports.handler = (event, context, callback) => {
                 if (response.verified === true) {
                   return callback(null, {
                     statusCode: 200,
-                    headers: headers,
+                    headers: constants.HEADERS,
                     body: JSON.stringify({
                       message: constants.STATUS.FAILURE,
                       description: constants.USER_ERRORS.ALREADY_VERIFIED,
@@ -99,7 +93,7 @@ exports.handler = (event, context, callback) => {
                           if (response === constants.STATUS.SUCCESS) {
                             return callback(null, {
                               statusCode: 200,
-                              headers: headers,
+                              headers: constants.HEADERS,
                               body: JSON.stringify({
                                 message: constants.STATUS.SUCCESS,
                                 description:
@@ -110,7 +104,7 @@ exports.handler = (event, context, callback) => {
                           } else {
                             return callback(null, {
                               statusCode: 200,
-                              headers: headers,
+                              headers: constants.HEADERS,
                               body: JSON.stringify({
                                 message: constants.STATUS.FAILURE,
                               }),
@@ -120,7 +114,7 @@ exports.handler = (event, context, callback) => {
                         .catch((error) => {
                           return callback(null, {
                             statusCode: 200,
-                            headers: headers,
+                            headers: constants.HEADERS,
                             body: JSON.stringify({
                               message: constants.STATUS.FAILURE,
                               description: error,
@@ -131,7 +125,7 @@ exports.handler = (event, context, callback) => {
                     .catch((error) => {
                       return callback(null, {
                         statusCode: 200,
-                        headers: headers,
+                        headers: constants.HEADERS,
                         body: JSON.stringify({
                           message: constants.STATUS.FAILURE,
                           description: error,
@@ -144,7 +138,7 @@ exports.handler = (event, context, callback) => {
                 if (error === constants.USER_ERRORS.USER_DOES_NOT_EXIST) {
                   return callback(null, {
                     statusCode: 200,
-                    headers: headers,
+                    headers: constants.HEADERS,
                     body: JSON.stringify({
                       message: constants.STATUS.FAILURE,
                       description: error,
@@ -158,7 +152,7 @@ exports.handler = (event, context, callback) => {
   } else {
     return callback(null, {
       statusCode: 200,
-      headers: headers,
+      headers: constants.HEADERS,
       body: JSON.stringify({ message: constants.STATUS.ALIVE }),
     });
   }

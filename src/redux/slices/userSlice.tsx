@@ -29,7 +29,8 @@ const initialState = {
     secret: sessionUserInfo !== null ? sessionUserInfo.secret : "",
   },
   registrationSuccess: false,
-  sendingRegistration: false,
+  registrationSending: false,
+  registrationErrorMessage: "",
   sendingLogin: false,
   loginError: false,
   loginErrorMessage: "",
@@ -75,12 +76,17 @@ const userSlice = createSlice({
       state.user.username = "";
       state.user.secret = "";
     },
-    registrationSuccessful: (state, action: PayloadAction<boolean>) => {
-      state.registrationSuccess = action.payload;
-      state.sendingRegistration = !action.payload;
+    registrationSuccessful: (state) => {
+      state.registrationSuccess = true;
+      state.registrationSending = false;
+    },
+    registrationFailure: (state, action: PayloadAction<string>) => {
+      state.registrationSuccess = false;
+      state.registrationSending = false;
+      state.registrationErrorMessage = action.payload;
     },
     updateSendingRegistration: (state, action: PayloadAction<boolean>) => {
-      state.sendingRegistration = action.payload;
+      state.registrationSending = action.payload;
     },
     updateSendingLogin: (state, action: PayloadAction<boolean>) => {
       state.sendingLogin = action.payload;
@@ -119,6 +125,7 @@ export const {
   loginFailure,
   logOutSuccessful,
   registrationSuccessful,
+  registrationFailure,
   updateSendingRegistration,
   updateSendingLogin,
   setVerificationCode,
@@ -134,7 +141,9 @@ export const getUser = (state: RootState) => state.user.user;
 export const getRegistrationSuccess = (state: RootState) =>
   state.user.registrationSuccess;
 export const getSendingRegistration = (state: RootState) =>
-  state.user.sendingRegistration;
+  state.user.registrationSending;
+export const getRegistrationErrorMessage = (state: RootState) =>
+  state.user.registrationErrorMessage;
 export const getSendingLogin = (state: RootState) => state.user.sendingLogin;
 export const getLoginError = (state: RootState) => state.user.loginError;
 export const getLoginErrorMessage = (state: RootState) =>
@@ -170,11 +179,10 @@ export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   }).then(
     (res) => {
       res.json().then((response) => {
-        if (response.message === "Successful") {
-          dispatch(registrationSuccessful(true));
-          return true;
+        if (response.message === constants.STATUS.SUCCESS) {
+          dispatch(registrationSuccessful());
         } else {
-          return false;
+          dispatch(registrationFailure(response.description));
         }
       });
     },

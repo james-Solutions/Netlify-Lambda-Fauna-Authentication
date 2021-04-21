@@ -6,12 +6,6 @@ const {
 } = require("../api-utils/User");
 const constants = require("../api-utils/constants");
 
-const headers = {
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTION",
-};
-
 exports.handler = (event, context, callback) => {
   if (event.httpMethod === "POST") {
     const userData = JSON.parse(event.body);
@@ -27,7 +21,7 @@ exports.handler = (event, context, callback) => {
                 if (response === constants.STATUS.SUCCESS) {
                   return callback(null, {
                     statusCode: 200,
-                    headers: headers,
+                    headers: constants.HEADERS,
                     body: JSON.stringify({ message: constants.STATUS.SUCCESS }),
                   });
                 }
@@ -35,7 +29,7 @@ exports.handler = (event, context, callback) => {
               .catch((error) => {
                 return callback(null, {
                   statusCode: 200,
-                  headers: headers,
+                  headers: constants.HEADERS,
                   body: JSON.stringify({
                     message: constants.STATUS.FAILURE,
                     description: error,
@@ -47,7 +41,7 @@ exports.handler = (event, context, callback) => {
             console.log(error);
             return callback(null, {
               statusCode: 200,
-              headers: headers,
+              headers: constants.HEADERS,
               body: JSON.stringify({
                 message: constants.STATUS.FAILURE,
                 description: error,
@@ -55,21 +49,23 @@ exports.handler = (event, context, callback) => {
             });
           });
       })
-      .catch((e) => {
-        console.error(e);
-        return callback(null, {
-          statusCode: 400,
-          headers: headers,
-          body: JSON.stringify({
-            message: constants.STATUS.FAILURE,
-            description: e,
-          }),
-        });
+      .catch((error) => {
+        console.error(error);
+        if (error.description === constants.FAUNA_ERRORS.NOT_UNIQUE) {
+          return callback(null, {
+            statusCode: 400,
+            headers: constants.HEADERS,
+            body: JSON.stringify({
+              message: constants.STATUS.FAILURE,
+              description: constants.USER_ERRORS.USER_NOT_UNIQUE,
+            }),
+          });
+        }
       });
   } else {
     return callback(null, {
       statusCode: 200,
-      headers: headers,
+      headers: constants.HEADERS,
       body: JSON.stringify({ message: constants.STATUS.ALIVE }),
     });
   }

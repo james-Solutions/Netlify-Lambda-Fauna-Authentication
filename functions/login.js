@@ -8,12 +8,6 @@ const client = new faunadb.Client({
   secret: process.env.REACT_APP_FAUNA_SECRET,
 });
 
-const headers = {
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTION",
-};
-
 exports.handler = (event, context, callback) => {
   if (event.httpMethod === "POST") {
     const postData = JSON.parse(event.body);
@@ -23,7 +17,7 @@ exports.handler = (event, context, callback) => {
         if (response.verified === false) {
           return callback(null, {
             statusCode: 200,
-            headers,
+            headers: constants.HEADERS,
             body: JSON.stringify({
               message: constants.STATUS.FAILURE,
               description: constants.USER_ERRORS.USER_NOT_VERIFIED,
@@ -32,7 +26,7 @@ exports.handler = (event, context, callback) => {
         } else if (response.approved === false) {
           return callback(null, {
             statusCode: 200,
-            headers,
+            headers: constants.HEADERS,
             body: JSON.stringify({
               message: constants.STATUS.FAILURE,
               description: constants.USER_ERRORS.USER_NOT_APPROVED,
@@ -50,7 +44,7 @@ exports.handler = (event, context, callback) => {
               console.log(response);
               return callback(null, {
                 statusCode: 200,
-                headers,
+                headers: constants.HEADERS,
                 body: JSON.stringify({
                   message: constants.STATUS.SUCCESS,
                   secret: response.secret,
@@ -62,7 +56,7 @@ exports.handler = (event, context, callback) => {
               const jsonData = JSON.parse(error);
               return callback(null, {
                 statusCode: jsonData.requestResult.statusCode,
-                headers,
+                headers: constants.HEADERS,
                 body: JSON.stringify({
                   message: jsonData.message,
                   description: jsonData.description,
@@ -82,13 +76,13 @@ exports.handler = (event, context, callback) => {
         if (response === true) {
           return callback(null, {
             statusCode: 200,
-            headers,
+            headers: constants.HEADERS,
             body: JSON.stringify({ message: constants.STATUS.SUCCESS }),
           });
         } else {
           return callback(null, {
             statusCode: 200,
-            headers,
+            headers: constants.HEADERS,
             body: JSON.stringify({ message: constants.STATUS.FAILURE }),
           });
         }
@@ -96,14 +90,14 @@ exports.handler = (event, context, callback) => {
       .catch((error) => {
         return callback(null, {
           statusCode: 400,
-          headers,
+          headers: constants.HEADERS,
           body: JSON.stringify({ message: constants.STATUS.FAILURE }),
         });
       });
   } else {
     return callback(null, {
       statusCode: 200,
-      headers,
+      headers: constants.HEADERS,
       body: JSON.stringify({ message: constants.STATUS.ALIVE }),
     });
   }
