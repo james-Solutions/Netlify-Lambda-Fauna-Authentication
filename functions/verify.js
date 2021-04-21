@@ -135,16 +135,14 @@ exports.handler = (event, context, callback) => {
                 }
               })
               .catch((error) => {
-                if (error === constants.USER_ERRORS.USER_DOES_NOT_EXIST) {
-                  return callback(null, {
-                    statusCode: 200,
-                    headers: constants.HEADERS,
-                    body: JSON.stringify({
-                      message: constants.STATUS.FAILURE,
-                      description: error,
-                    }),
-                  });
-                }
+                return callback(null, {
+                  statusCode: 200,
+                  headers: constants.HEADERS,
+                  body: JSON.stringify({
+                    message: constants.STATUS.FAILURE,
+                    description: error,
+                  }),
+                });
               });
           }
         });

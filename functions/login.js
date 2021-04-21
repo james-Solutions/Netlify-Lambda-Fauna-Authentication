@@ -89,7 +89,7 @@ exports.handler = (event, context, callback) => {
       })
       .catch((error) => {
         return callback(null, {
-          statusCode: 400,
+          statusCode: 200,
           headers: constants.HEADERS,
           body: JSON.stringify({ message: constants.STATUS.FAILURE }),
         });

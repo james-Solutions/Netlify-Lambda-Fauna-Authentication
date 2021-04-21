@@ -53,7 +53,7 @@ exports.handler = (event, context, callback) => {
         console.error(error);
         if (error.description === constants.FAUNA_ERRORS.NOT_UNIQUE) {
           return callback(null, {
-            statusCode: 400,
+            statusCode: 200,
             headers: constants.HEADERS,
             body: JSON.stringify({
               message: constants.STATUS.FAILURE,
