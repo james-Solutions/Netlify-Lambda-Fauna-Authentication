@@ -60,6 +60,15 @@ exports.handler = (event, context, callback) => {
               description: constants.USER_ERRORS.USER_NOT_UNIQUE,
             }),
           });
+        } else {
+          return callback(null, {
+            statusCode: 200,
+            headers: constants.HEADERS,
+            body: JSON.stringify({
+              message: constants.STATUS.FAILURE,
+              description: error.description,
+            }),
+          });
         }
       });
   } else {

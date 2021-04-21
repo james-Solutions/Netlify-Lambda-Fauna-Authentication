@@ -303,6 +303,7 @@ export const Registration: React.FC = () => {
               <IonButton
                 expand="block"
                 type="submit"
+                disabled={registrationInProgress}
                 onClick={(event: any) => {
                   registrationBtnHandler(event);
                 }}
