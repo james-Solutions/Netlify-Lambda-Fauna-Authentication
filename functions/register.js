@@ -1,92 +1,37 @@
-const faunadb = require("faunadb");
-const SparkPost = require("sparkpost");
-
-/* configure faunaDB & Sparkpost Client with our secrets */
-const query = faunadb.query;
-const clientFauna = new faunadb.Client({
-  secret: process.env.REACT_APP_FAUNA_SECRET,
-});
-const clientSparkpost = new SparkPost(process.env.REACT_APP_SPARKPOST);
-
-const headers = {
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTION",
-};
-
-let domainUrl = process.env.REACT_APP_DEV
-  ? "https://localhost:3000"
-  : "https://modest-cori-434d1e.netlify.app";
-
-function createUser(userData) {
-  return clientFauna.query(
-    query.Create(query.Collection("users"), {
-      credentials: {
-        password: userData.password,
-      },
-      data: {
-        email: userData.email,
-        username: userData.username,
-        accessLevel: userData.accessLevel,
-        verified: false,
-        approved: false,
-      },
-    })
-  );
-}
-
-function createUserCode(email, code) {
-  return clientFauna.query(
-    query.Create(query.Collection("users_verification_codes"), {
-      data: {
-        email,
-        code,
-      },
-    })
-  );
-}
+const {
+  createUser,
+  createUserCode,
+  sendVerifyCode,
+  generateCode,
+} = require("../api-utils/User");
+const constants = require("../api-utils/constants");
 
 exports.handler = (event, context, callback) => {
   if (event.httpMethod === "POST") {
     const userData = JSON.parse(event.body);
     createUser(userData)
       .then((user) => {
-        const code = Math.floor(100000 + Math.random() * 900000);
+        const code = generateCode();
         // Create the one time code
         createUserCode(userData.email, code)
           .then((response) => {
             // Send Email
-            clientSparkpost.transmissions
-              .send({
-                content: {
-                  from: "verification@sparkpost.studying.solutions",
-                  subject: `${userData.username}, email verification for SSP Account`,
-                  html: `
-                  <html>
-                    <body>
-                      <p>Thank you for signing up for the Student Scheduler Planner (SSP).</p>
-                      <p>Please <a href=${domainUrl}/user/verify/${userData.email}>click me</a> to verify your email.</p>
-                      <p>Use code <span style="color:red">${code}</span> to complete your verification.</p>
-                      <p>Once your account has been verified and approved, you will be able to login.</p>
-                    </body>
-                  </html>`,
-                },
-                recipients: [{ address: userData.email }],
-              })
-              .then((data) => {
-                return callback(null, {
-                  statusCode: 200,
-                  headers: headers,
-                  body: JSON.stringify({ message: "Successful" }),
-                });
+            sendVerifyCode(userData, code)
+              .then((response) => {
+                if (response === constants.STATUS.SUCCESS) {
+                  return callback(null, {
+                    statusCode: 200,
+                    headers: constants.HEADERS,
+                    body: JSON.stringify({ message: constants.STATUS.SUCCESS }),
+                  });
+                }
               })
               .catch((error) => {
-                console.log(error);
                 return callback(null, {
                   statusCode: 200,
-                  headers: headers,
+                  headers: constants.HEADERS,
                   body: JSON.stringify({
-                    message: "Failure",
+                    message: constants.STATUS.FAILURE,
                     description: error,
                   }),
                 });
@@ -96,24 +41,41 @@ exports.handler = (event, context, callback) => {
             console.log(error);
             return callback(null, {
               statusCode: 200,
-              headers: headers,
-              body: JSON.stringify({ message: "Failure", description: error }),
+              headers: constants.HEADERS,
+              body: JSON.stringify({
+                message: constants.STATUS.FAILURE,
+                description: error,
+              }),
             });
           });
       })
-      .catch((e) => {
-        console.error(e);
-        return callback(null, {
-          statusCode: 400,
-          headers: headers,
-          body: JSON.stringify({ message: "Failure", description: e }),
-        });
+      .catch((error) => {
+        console.error(error);
+        if (error.description === constants.FAUNA_ERRORS.NOT_UNIQUE) {
+          return callback(null, {
+            statusCode: 200,
+            headers: constants.HEADERS,
+            body: JSON.stringify({
+              message: constants.STATUS.FAILURE,
+              description: constants.USER_ERRORS.USER_NOT_UNIQUE,
+            }),
+          });
+        } else {
+          return callback(null, {
+            statusCode: 200,
+            headers: constants.HEADERS,
+            body: JSON.stringify({
+              message: constants.STATUS.FAILURE,
+              description: error.description,
+            }),
+          });
+        }
       });
   } else {
     return callback(null, {
       statusCode: 200,
-      headers: headers,
-      body: JSON.stringify({ message: "Alive" }),
+      headers: constants.HEADERS,
+      body: JSON.stringify({ message: constants.STATUS.ALIVE }),
     });
   }
 };

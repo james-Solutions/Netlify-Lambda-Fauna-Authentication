@@ -28,6 +28,8 @@ import {
   getVerificationSending,
 } from "../../redux/slices/userSlice";
 
+import * as constants from "../../constants";
+
 interface MatchParams {
   email: string;
 }
@@ -49,6 +51,7 @@ export const Verify: React.FC<Props> = (props: Props) => {
   const errorMessage = useSelector(getVerificationErrorMessage);
   const error = useSelector(getVerificationError);
   const [inputCode, setInputCode] = useState<string>();
+  const [codeMatchError, setCodeMatchError] = useState<boolean>(false);
 
   const btnCodeSubmitHandler = (event: Event) => {
     event.preventDefault();
@@ -56,6 +59,7 @@ export const Verify: React.FC<Props> = (props: Props) => {
     const parsedInputCode = parseInt(inputCode);
     if (!isNaN(parsedInputCode)) {
       if (parsedInputCode === verificationCode) {
+        setCodeMatchError(false);
         dispatch(
           verifyVerificationCode({
             email: props.match.params.email,
@@ -63,7 +67,7 @@ export const Verify: React.FC<Props> = (props: Props) => {
           })
         );
       } else {
-        console.log("does not match");
+        setCodeMatchError(true);
       }
     }
   };
@@ -88,7 +92,7 @@ export const Verify: React.FC<Props> = (props: Props) => {
                   onIonChange={(event) => setInputCode(event.detail.value!)}
                   type="text"
                   required={true}
-                  disabled={sendingVerification || error}
+                  disabled={sendingVerification || error || !verificationCode}
                 ></IonInput>
               </IonItem>
               {sendingVerification === true ? (
@@ -96,17 +100,30 @@ export const Verify: React.FC<Props> = (props: Props) => {
               ) : (
                 <div />
               )}
-              {error === true ? (
-                <IonItem>
-                  <IonLabel color="danger">{errorMessage}</IonLabel>
-                </IonItem>
+              {errorMessage ? (
+                <IonCardContent>
+                  <IonItem>
+                    <IonLabel color="danger">{errorMessage}</IonLabel>
+                  </IonItem>
+                </IonCardContent>
               ) : (
-                <div />
+                ""
+              )}
+              {codeMatchError === true ? (
+                <IonCardContent>
+                  <IonItem>
+                    <IonLabel color="danger">
+                      {constants.USER_ERRORS.CODE_DOES_NOT_MATCH}
+                    </IonLabel>
+                  </IonItem>
+                </IonCardContent>
+              ) : (
+                ""
               )}
               <IonButton
                 expand="block"
                 type="submit"
-                disabled={sendingVerification || error}
+                disabled={sendingVerification || error || !verificationCode}
                 onClick={(event: any) => {
                   btnCodeSubmitHandler(event);
                 }}
@@ -135,11 +152,11 @@ export const Verify: React.FC<Props> = (props: Props) => {
             </IonCardHeader>
             <IonCardContent>
               <IonItem>
-                Your account is now verified. If it is approved as well, you may
-                login{" "}
-                <a style={{ display: "inline-block" }} href="/user/login">
-                  here
-                </a>
+                Your account is now verified. If it is{" "}
+                <u style={{ display: "contents" }}>
+                  <b style={{ display: "contents" }}>approved</b>
+                </u>{" "}
+                as well, you may login.
               </IonItem>
             </IonCardContent>
           </IonCard>

@@ -7,6 +7,7 @@ import {
   RegistrationRequest,
   VerifyUser,
 } from "../interfaces/interfaces";
+import * as constants from "../../constants";
 
 let apiUrl = "/.netlify/functions";
 
@@ -28,7 +29,8 @@ const initialState = {
     secret: sessionUserInfo !== null ? sessionUserInfo.secret : "",
   },
   registrationSuccess: false,
-  sendingRegistration: false,
+  registrationSending: false,
+  registrationErrorMessage: "",
   sendingLogin: false,
   loginError: false,
   loginErrorMessage: "",
@@ -68,19 +70,23 @@ const userSlice = createSlice({
       state.loginErrorMessage = action.payload;
     },
     logOutSuccessful: (state) => {
-      console.log("clearing");
       sessionStorage.clear();
       state.isAuth = false;
       state.user.email = "";
       state.user.username = "";
       state.user.secret = "";
     },
-    registrationSuccessful: (state, action: PayloadAction<boolean>) => {
-      state.registrationSuccess = action.payload;
-      state.sendingRegistration = !action.payload;
+    registrationSuccessful: (state) => {
+      state.registrationSuccess = true;
+      state.registrationSending = false;
+    },
+    registrationFailure: (state, action: PayloadAction<string>) => {
+      state.registrationSuccess = false;
+      state.registrationSending = false;
+      state.registrationErrorMessage = action.payload;
     },
     updateSendingRegistration: (state, action: PayloadAction<boolean>) => {
-      state.sendingRegistration = action.payload;
+      state.registrationSending = action.payload;
     },
     updateSendingLogin: (state, action: PayloadAction<boolean>) => {
       state.sendingLogin = action.payload;
@@ -107,6 +113,9 @@ const userSlice = createSlice({
       state.verificationErrorMessage = "";
       state.verificationSending = action.payload;
     },
+    setVerificationMessage: (state, action: PayloadAction<string>) => {
+      state.verificationErrorMessage = action.payload;
+    },
   },
 });
 
@@ -116,12 +125,14 @@ export const {
   loginFailure,
   logOutSuccessful,
   registrationSuccessful,
+  registrationFailure,
   updateSendingRegistration,
   updateSendingLogin,
   setVerificationCode,
   setVerificationSuccess,
   setVerificationFailure,
   setVerificationSending,
+  setVerificationMessage,
 } = userSlice.actions;
 
 // Selectors
@@ -130,7 +141,9 @@ export const getUser = (state: RootState) => state.user.user;
 export const getRegistrationSuccess = (state: RootState) =>
   state.user.registrationSuccess;
 export const getSendingRegistration = (state: RootState) =>
-  state.user.sendingRegistration;
+  state.user.registrationSending;
+export const getRegistrationErrorMessage = (state: RootState) =>
+  state.user.registrationErrorMessage;
 export const getSendingLogin = (state: RootState) => state.user.sendingLogin;
 export const getLoginError = (state: RootState) => state.user.loginError;
 export const getLoginErrorMessage = (state: RootState) =>
@@ -166,11 +179,10 @@ export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   }).then(
     (res) => {
       res.json().then((response) => {
-        if (response.message === "Successful") {
-          dispatch(registrationSuccessful(true));
-          return true;
+        if (response.message === constants.STATUS.SUCCESS) {
+          dispatch(registrationSuccessful());
         } else {
-          return false;
+          dispatch(registrationFailure(response.description));
         }
       });
     },
@@ -200,7 +212,7 @@ export const loginRequest = (user: LoginRequestUser): AppThunk => (
       res
         .json()
         .then((response) => {
-          if (response.message === "Success") {
+          if (response.message === constants.STATUS.SUCCESS) {
             dispatch(
               loginSuccessful({
                 email: user.email,
@@ -233,7 +245,7 @@ export const logOutUser = (): AppThunk => (dispatch) => {
     (resRaw) => {
       resRaw.json().then((response) => {
         dispatch(logOutSuccessful());
-        if (response.message === "Success") {
+        if (response.message === constants.STATUS.SUCCESS) {
         } else {
           console.log("Could not logout");
         }
@@ -260,8 +272,13 @@ export const fetchVerificationCode = (user: VerifyUser): AppThunk => (
   }).then(
     (resRaw) => {
       resRaw.json().then((response) => {
-        if (response.message === "Success") {
+        if (response.message === constants.STATUS.SUCCESS) {
           dispatch(setVerificationCode(response.code));
+          if (
+            response.description === constants.USER_ERRORS.NO_CODE_UNVERIFIED
+          ) {
+            dispatch(setVerificationMessage(response.description));
+          }
         } else {
           dispatch(setVerificationFailure(response.description));
         }
@@ -291,7 +308,7 @@ export const verifyVerificationCode = (user: {
   }).then(
     (resRaw) => {
       resRaw.json().then((response) => {
-        if (response.message === "Success") {
+        if (response.message === constants.STATUS.SUCCESS) {
           dispatch(setVerificationSuccess());
         } else {
           console.log("Could not validate the code");
