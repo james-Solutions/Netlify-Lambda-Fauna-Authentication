@@ -33,6 +33,9 @@ const initialState = {
   loginError: false,
   loginErrorMessage: "",
   verificationCode: 0,
+  verificationSuccess: false,
+  verificationError: false,
+  verificationErrorMessage: "",
 };
 
 // Redux Slice
@@ -86,6 +89,16 @@ const userSlice = createSlice({
     setVerificationCode: (state, action: PayloadAction<number>) => {
       state.verificationCode = action.payload;
     },
+    setVerificationSuccess: (state) => {
+      state.verificationCode = 0;
+      state.verificationError = false;
+      state.verificationErrorMessage = "";
+      state.verificationSuccess = true;
+    },
+    setVerificationFailure: (state, action: PayloadAction<string>) => {
+      state.verificationError = true;
+      state.verificationErrorMessage = action.payload;
+    },
   },
 });
 
@@ -98,6 +111,8 @@ export const {
   updateSendingRegistration,
   updateSendingLogin,
   setVerificationCode,
+  setVerificationSuccess,
+  setVerificationFailure,
 } = userSlice.actions;
 
 // Selectors
@@ -113,6 +128,12 @@ export const getLoginErrorMessage = (state: RootState) =>
   state.user.loginErrorMessage;
 export const getVerificationCode = (state: RootState) =>
   state.user.verificationCode;
+export const getVerificationSuccess = (state: RootState) =>
+  state.user.verificationSuccess;
+export const getVerificationError = (state: RootState) =>
+  state.user.verificationError;
+export const getVerificationErrorMessage = (state: RootState) =>
+  state.user.verificationErrorMessage;
 
 export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   dispatch
@@ -232,6 +253,37 @@ export const fetchVerificationCode = (user: VerifyUser): AppThunk => (
           dispatch(setVerificationCode(response.code));
         } else {
           console.log("Could not find email with code");
+        }
+      });
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
+};
+
+export const verifyVerificationCode = (user: {
+  email: string;
+  code: number;
+}): AppThunk => (dispatch) => {
+  // Fetch
+  fetch(`${apiUrl}/verify`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: user.email,
+      code: user.code,
+    }),
+  }).then(
+    (resRaw) => {
+      resRaw.json().then((response) => {
+        if (response.message === "Success") {
+          dispatch(setVerificationSuccess());
+        } else {
+          console.log("Could not validate the code");
+          dispatch(setVerificationFailure(response.description));
         }
       });
     },

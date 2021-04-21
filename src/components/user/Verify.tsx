@@ -21,6 +21,10 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getVerificationCode,
   fetchVerificationCode,
+  verifyVerificationCode,
+  getVerificationError,
+  getVerificationErrorMessage,
+  getVerificationSuccess,
 } from "../../redux/slices/userSlice";
 
 interface MatchParams {
@@ -43,6 +47,20 @@ export const Verify: React.FC<Props> = (props: Props) => {
 
   const btnCodeSubmitHandler = (event: Event) => {
     event.preventDefault();
+    if (inputCode === undefined) return;
+    const parsedInputCode = parseInt(inputCode);
+    if (!isNaN(parsedInputCode)) {
+      if (parsedInputCode === verificationCode) {
+        dispatch(
+          verifyVerificationCode({
+            email: props.match.params.email,
+            code: parsedInputCode,
+          })
+        );
+      } else {
+        console.log("does not match");
+      }
+    }
   };
   if (finishedLoading) {
     return (

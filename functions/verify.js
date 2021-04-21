@@ -15,21 +15,63 @@ const headers = {
 exports.handler = (event, context, callback) => {
   if (event.httpMethod === "POST") {
     const userData = JSON.parse(event.body);
-    getUserVerificationCode(userData.email)
-      .then((response) => {
-        return callback(null, {
-          statusCode: 200,
-          headers: headers,
-          body: JSON.stringify({ message: "Success", code: response }),
+    if (userData.email && userData.code) {
+      updateUserVerification(userData.email)
+        .then((response) => {
+          if (response === "Success") {
+            deleteUserCode(userData.email)
+              .then((response) => {
+                return callback(null, {
+                  statusCode: 200,
+                  headers: headers,
+                  body: JSON.stringify({ message: "Success" }),
+                });
+              })
+              .catch((error) => {
+                return callback(null, {
+                  statusCode: 200,
+                  headers: headers,
+                  body: JSON.stringify({
+                    message: "Failure",
+                    description: error,
+                  }),
+                });
+              });
+          } else {
+            return callback(null, {
+              statusCode: 200,
+              headers: headers,
+              body: JSON.stringify({
+                message: "Failure",
+                description: response,
+              }),
+            });
+          }
+        })
+        .catch((error) => {
+          return callback(null, {
+            statusCode: 200,
+            headers: headers,
+            body: JSON.stringify({ message: "Failure", description: error }),
+          });
         });
-      })
-      .catch((error) => {
-        return callback(null, {
-          statusCode: 200,
-          headers: headers,
-          body: JSON.stringify({ message: "Failure", description: error }),
+    } else {
+      getUserVerificationCode(userData.email)
+        .then((response) => {
+          return callback(null, {
+            statusCode: 200,
+            headers: headers,
+            body: JSON.stringify({ message: "Success", code: response }),
+          });
+        })
+        .catch((error) => {
+          return callback(null, {
+            statusCode: 200,
+            headers: headers,
+            body: JSON.stringify({ message: "Failure", description: error }),
+          });
         });
-      });
+    }
   } else {
     return callback(null, {
       statusCode: 200,
@@ -56,6 +98,53 @@ async function getUserVerificationCode(email) {
       })
       .then(() => {
         resolve(response);
+      });
+  });
+}
+
+async function updateUserVerification(email) {
+  return new Promise((resolve, reject) => {
+    clientFauna
+      .query(
+        query.Update(
+          query.Select(
+            ["ref"],
+            query.Get(query.Match(query.Index("users_by_email"), email))
+          ),
+          {
+            data: {
+              verified: true,
+            },
+          }
+        )
+      )
+      .then((response) => {
+        resolve("Success");
+      })
+
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+async function deleteUserCode(email) {
+  return new Promise((resolve, reject) => {
+    clientFauna
+      .query(
+        query.Delete(
+          query.Select(
+            ["ref"],
+            query.Get(query.Match(query.Index("users_codes_by_email"), email))
+          )
+        )
+      )
+      .then((response) => {
+        resolve("Success");
+      })
+
+      .catch((error) => {
+        reject(error);
       });
   });
 }
