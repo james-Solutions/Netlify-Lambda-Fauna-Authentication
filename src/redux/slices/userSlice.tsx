@@ -7,6 +7,7 @@ import {
   RegistrationRequest,
   VerifyUser,
 } from "../interfaces/interfaces";
+import * as constants from "../../constants";
 
 let apiUrl = "/.netlify/functions";
 
@@ -68,7 +69,6 @@ const userSlice = createSlice({
       state.loginErrorMessage = action.payload;
     },
     logOutSuccessful: (state) => {
-      console.log("clearing");
       sessionStorage.clear();
       state.isAuth = false;
       state.user.email = "";
@@ -107,6 +107,9 @@ const userSlice = createSlice({
       state.verificationErrorMessage = "";
       state.verificationSending = action.payload;
     },
+    setVerificationMessage: (state, action: PayloadAction<string>) => {
+      state.verificationErrorMessage = action.payload;
+    },
   },
 });
 
@@ -122,6 +125,7 @@ export const {
   setVerificationSuccess,
   setVerificationFailure,
   setVerificationSending,
+  setVerificationMessage,
 } = userSlice.actions;
 
 // Selectors
@@ -200,7 +204,7 @@ export const loginRequest = (user: LoginRequestUser): AppThunk => (
       res
         .json()
         .then((response) => {
-          if (response.message === "Success") {
+          if (response.message === constants.STATUS.SUCCESS) {
             dispatch(
               loginSuccessful({
                 email: user.email,
@@ -233,7 +237,7 @@ export const logOutUser = (): AppThunk => (dispatch) => {
     (resRaw) => {
       resRaw.json().then((response) => {
         dispatch(logOutSuccessful());
-        if (response.message === "Success") {
+        if (response.message === constants.STATUS.SUCCESS) {
         } else {
           console.log("Could not logout");
         }
@@ -260,8 +264,13 @@ export const fetchVerificationCode = (user: VerifyUser): AppThunk => (
   }).then(
     (resRaw) => {
       resRaw.json().then((response) => {
-        if (response.message === "Success") {
+        if (response.message === constants.STATUS.SUCCESS) {
           dispatch(setVerificationCode(response.code));
+          if (
+            response.description === constants.USER_ERRORS.NO_CODE_UNVERIFIED
+          ) {
+            dispatch(setVerificationMessage(response.description));
+          }
         } else {
           dispatch(setVerificationFailure(response.description));
         }
@@ -291,7 +300,7 @@ export const verifyVerificationCode = (user: {
   }).then(
     (resRaw) => {
       resRaw.json().then((response) => {
-        if (response.message === "Success") {
+        if (response.message === constants.STATUS.SUCCESS) {
           dispatch(setVerificationSuccess());
         } else {
           console.log("Could not validate the code");

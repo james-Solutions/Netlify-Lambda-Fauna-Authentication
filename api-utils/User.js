@@ -1,7 +1,9 @@
 const faunadb = require("faunadb");
 const constants = require("../api-utils/constants");
+const SparkPost = require("sparkpost");
 
-/* configure faunaDB Client with our secret */
+/* configure FaunaDB & Sparkpost Client with our secrets */
+const clientSparkpost = new SparkPost(process.env.REACT_APP_SPARKPOST);
 const query = faunadb.query;
 const clientFauna = new faunadb.Client({
   secret: process.env.REACT_APP_FAUNA_SECRET,
@@ -177,4 +179,40 @@ export async function loginAndGetToken(userData) {
   return clientFauna.query(
     query.Login(query.Match(query.Index("users_by_email"), email), { password })
   );
+}
+
+export async function sendVerifyCode(userData, code) {
+  return new Promise((resolve, reject) => {
+    clientSparkpost.transmissions
+      .send({
+        content: {
+          from: "verification@sparkpost.studying.solutions",
+          subject: `${userData.email}, email verification for SSP Account`,
+          html: `
+                  <html>
+                    <body>
+                      <p>Thank you for signing up for the Student Scheduler Planner (SSP).</p>
+                      <p>Please <a href=${constants.URL.DOMAIN}/user/verify/${userData.email}>click me</a> to verify your email.</p>
+                      <p>Use code the following code to complete your verification: <span style="color:red">${code}</span></p>
+                      <p>Once your account has been verified and approved, you will be able to login.</p>
+                    </body>
+                  </html>`,
+        },
+        recipients: [{ address: userData.email }],
+      })
+      .then((data) => {
+        resolve(constants.STATUS.SUCCESS);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+/**
+ * generateCode - Returns a number that is 6 digits long and does not start with 0
+ * @returns {number} Random number that is not 0 and is 6 digits log
+ */
+export function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000);
 }

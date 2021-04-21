@@ -4,6 +4,8 @@ const {
   getUserVerificationCode,
   getUserVerifyApprove,
   createUserCode,
+  generateCode,
+  sendVerifyCode,
 } = require("../api-utils/User");
 const constants = require("../api-utils/constants");
 
@@ -88,18 +90,43 @@ exports.handler = (event, context, callback) => {
                   });
                 } else {
                   // Should we just make a new code?
-                  const code = Math.floor(100000 + Math.random() * 900000);
+                  const code = generateCode();
                   createUserCode(userData.email, code)
                     .then((response) => {
-                      return callback(null, {
-                        statusCode: 200,
-                        headers: headers,
-                        body: JSON.stringify({
-                          message: constants.STATUS.SUCCESS,
-                          description: constants.USER_ERRORS.NO_CODE_UNVERIFIED,
-                          code: code,
-                        }),
-                      });
+                      // Send email with code
+                      sendVerifyCode(userData, code)
+                        .then((response) => {
+                          if (response === constants.STATUS.SUCCESS) {
+                            return callback(null, {
+                              statusCode: 200,
+                              headers: headers,
+                              body: JSON.stringify({
+                                message: constants.STATUS.SUCCESS,
+                                description:
+                                  constants.USER_ERRORS.NO_CODE_UNVERIFIED,
+                                code: code,
+                              }),
+                            });
+                          } else {
+                            return callback(null, {
+                              statusCode: 200,
+                              headers: headers,
+                              body: JSON.stringify({
+                                message: constants.STATUS.FAILURE,
+                              }),
+                            });
+                          }
+                        })
+                        .catch((error) => {
+                          return callback(null, {
+                            statusCode: 200,
+                            headers: headers,
+                            body: JSON.stringify({
+                              message: constants.STATUS.FAILURE,
+                              description: error,
+                            }),
+                          });
+                        });
                     })
                     .catch((error) => {
                       return callback(null, {
