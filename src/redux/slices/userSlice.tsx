@@ -17,7 +17,6 @@ if (process.env.REACT_APP_DEV === "true") {
 }
 
 const cookieUserInfo = cookie.load("user-info");
-console.log(cookieUserInfo);
 
 const initialState = {
   isAuth: cookieUserInfo !== undefined ? true : false,
@@ -183,7 +182,7 @@ export const registrationRequest = (user: RegistrationRequest): AppThunk => (
       });
     },
     (error) => {
-      console.log(error);
+      dispatch(registrationFailure(error));
     }
   );
 };
@@ -222,11 +221,11 @@ export const loginRequest = (user: LoginRequestUser): AppThunk => (
           }
         })
         .catch((error) => {
-          console.log(error);
+          dispatch(loginFailure(error));
         });
     },
     (error) => {
-      console.log(error);
+      dispatch(loginFailure(error));
     }
   );
 };
@@ -282,7 +281,7 @@ export const fetchVerificationCode = (user: VerifyUser): AppThunk => (
       });
     },
     (error) => {
-      console.log(error);
+      dispatch(setVerificationFailure(error));
     }
   );
 };
@@ -308,13 +307,12 @@ export const verifyVerificationCode = (user: {
         if (response.message === constants.STATUS.SUCCESS) {
           dispatch(setVerificationSuccess());
         } else {
-          console.log("Could not validate the code");
           dispatch(setVerificationFailure(response.description));
         }
       });
     },
     (error) => {
-      console.log(error);
+      dispatch(setVerificationFailure(error));
     }
   );
 };

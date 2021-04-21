@@ -38,7 +38,6 @@ exports.handler = (event, context, callback) => {
               });
           })
           .catch((error) => {
-            console.log(error);
             return callback(null, {
               statusCode: 200,
               headers: constants.HEADERS,

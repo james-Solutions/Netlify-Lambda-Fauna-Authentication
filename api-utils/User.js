@@ -220,6 +220,12 @@ export async function loginAndGetToken(userData) {
   );
 }
 
+/**
+ * sendVerifyCode - Sends the code using the email field in the userData object.
+ * @param {object} userData
+ * @param {number} code
+ * @returns {Promise}
+ */
 export async function sendVerifyCode(userData, code) {
   return new Promise((resolve, reject) => {
     clientSparkpost.transmissions

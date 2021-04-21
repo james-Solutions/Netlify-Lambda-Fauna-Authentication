@@ -69,7 +69,6 @@ exports.handler = (event, context, callback) => {
                 });
             })
             .catch((error) => {
-              console.log(error);
               return callback(null, {
                 statusCode: 200,
                 headers: constants.HEADERS,
@@ -82,7 +81,6 @@ exports.handler = (event, context, callback) => {
         }
       })
       .catch((error) => {
-        console.log(error);
         return callback(null, {
           statusCode: 200,
           headers: constants.HEADERS,
@@ -96,8 +94,7 @@ exports.handler = (event, context, callback) => {
     client
       .query(query.Logout(false))
       .then((response) => {
-        console.log(response);
-        if (response === true) {
+        if (response === false) {
           return callback(null, {
             statusCode: 200,
             headers: constants.HEADERS,
