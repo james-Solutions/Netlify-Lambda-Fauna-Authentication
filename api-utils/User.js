@@ -265,7 +265,7 @@ export function generateCode() {
 export async function getUnverifiedUsers() {
   return new Promise((resolve, reject) => {
     let helper = clientFauna.paginate(
-      query.Match(query.Index("users_unverified"), false)
+      query.Match(query.Index("users_unapproved"), false)
     );
     const response = [];
     helper

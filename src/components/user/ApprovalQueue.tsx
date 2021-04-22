@@ -16,6 +16,7 @@ import {
   IonToast,
   IonProgressBar,
   IonText,
+  IonIcon,
 } from "@ionic/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -23,6 +24,7 @@ import {
   getUnverifiedUsers,
 } from "../../redux/slices/userSlice";
 import * as constants from "../../constants";
+import { checkmark, checkmarkCircle, closeCircle } from "ionicons/icons";
 
 export const ApprovalQueue: React.FC = () => {
   const dispatch = useDispatch();
@@ -37,7 +39,14 @@ export const ApprovalQueue: React.FC = () => {
   };
 
   const unverifiedUsers = useSelector(getUnverifiedUsers);
-  if (unverifiedUsers.length > 0) console.log(unverifiedUsers);
+
+  const approveBtnHandler = (index: number) => {
+    console.log(unverifiedUsers[index]);
+  };
+
+  const rejectBtnHandler = (index: number) => {
+    console.log(unverifiedUsers[index]);
+  };
 
   if (finishedLoading) {
     return (
@@ -53,6 +62,7 @@ export const ApprovalQueue: React.FC = () => {
               <IonCardTitle>Users pending approval</IonCardTitle>
             </IonCardHeader>
             <IonCardContent>
+              {/* TODO: Implement IonTab && IonGrid */}
               {unverifiedUsers.length > 0
                 ? unverifiedUsers.map((unvUser, index) => {
                     return (
@@ -70,13 +80,33 @@ export const ApprovalQueue: React.FC = () => {
                           </IonText>
                           <br />
                           <IonText style={TextContainerStyle}>
-                            Verified: {String(unvUser.verified)}
+                            Verified:{" "}
+                            {unvUser.verified === true ? (
+                              <IonIcon color="success" icon={checkmarkCircle} />
+                            ) : (
+                              <IonIcon color="danger" icon={closeCircle} />
+                            )}
                           </IonText>
-                          <br />
-                          <IonText style={TextContainerStyle}>
-                            Approved: {String(unvUser.approved)}
-                          </IonText>
-                          <br />
+                          <IonButton
+                            type="submit"
+                            color="danger"
+                            onClick={(event: any) => {
+                              event.preventDefault();
+                              rejectBtnHandler(index);
+                            }}
+                          >
+                            Reject
+                          </IonButton>
+                          <IonButton
+                            type="submit"
+                            color="success"
+                            onClick={(event: any) => {
+                              event.preventDefault();
+                              approveBtnHandler(index);
+                            }}
+                          >
+                            Approve
+                          </IonButton>
                         </IonCardContent>
                       </IonCard>
                     );
