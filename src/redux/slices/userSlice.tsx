@@ -8,6 +8,7 @@ import {
   VerifyUser,
 } from "../interfaces/interfaces";
 import * as constants from "../../constants";
+import { unverifiedUser } from "../../components/user/Interfaces";
 const cookie = require("react-cookies");
 
 let apiUrl = "/.netlify/functions";
@@ -17,6 +18,7 @@ if (process.env.REACT_APP_DEV === "true") {
 }
 
 const cookieUserInfo = cookie.load("user-info");
+let unverifiedUsers: unverifiedUser[] = [];
 
 const initialState = {
   isAuth: cookieUserInfo !== undefined ? true : false,
@@ -37,7 +39,7 @@ const initialState = {
   verificationError: false,
   verificationErrorMessage: "",
   verificationSending: false,
-  unverifiedUsers: [],
+  unverifiedUsers,
   fetchingUnverifiedUsers: false,
   fetchingUnverifiedUsersErrorMessage: "",
 };
@@ -117,7 +119,10 @@ const userSlice = createSlice({
     setFetchingUnverifiedUsers: (state) => {
       state.fetchingUnverifiedUsers = true;
     },
-    unverifiedUsersSuccessful: (state, action: PayloadAction<Array<never>>) => {
+    unverifiedUsersSuccessful: (
+      state,
+      action: PayloadAction<Array<unverifiedUser>>
+    ) => {
       state.unverifiedUsers = action.payload;
       state.fetchingUnverifiedUsers = false;
     },
