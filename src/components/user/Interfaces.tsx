@@ -4,4 +4,6 @@ export interface unapprovedUser {
   accessLevel: string;
   verified: boolean;
   approved: boolean;
+  updating: boolean;
+  errorMessage: string;
 }

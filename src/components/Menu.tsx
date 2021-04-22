@@ -24,6 +24,10 @@ import {
   bookSharp,
   bookmarksOutline,
   bookmarksSharp,
+  settingsOutline,
+  settingsSharp,
+  calendarOutline,
+  calendarSharp,
 } from "ionicons/icons";
 import "./Menu.css";
 
@@ -71,14 +75,14 @@ const loggedInAppPages: AppPage[] = [
   {
     title: "Schedule",
     url: "/schedule",
-    iosIcon: homeOutline,
-    mdIcon: homeSharp,
+    iosIcon: calendarOutline,
+    mdIcon: calendarSharp,
   },
   {
     title: "Student Settings",
     url: "/student/settings",
-    iosIcon: homeOutline,
-    mdIcon: homeSharp,
+    iosIcon: settingsOutline,
+    mdIcon: settingsSharp,
   },
 ];
 
@@ -100,13 +104,13 @@ const RootAppPages: AppPage[] = [
 
 const AdminRootAppPages: AppPage[] = [
   {
-    title: "Catalog",
+    title: "Catalog Management",
     url: "/catalog",
     iosIcon: bookOutline,
     mdIcon: bookSharp,
   },
   {
-    title: "Section",
+    title: "Section Management",
     url: "/section",
     iosIcon: bookmarksOutline,
     mdIcon: bookmarksSharp,

@@ -9,22 +9,21 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonItem,
-  IonLabel,
   IonButton,
-  IonInput,
-  IonToast,
   IonProgressBar,
   IonText,
-  IonIcon,
+  IonRow,
+  IonGrid,
+  IonCol,
 } from "@ionic/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchUnapprovedUsers,
   getUnapprovedUsers,
   getFetchingUnapprovedUsers,
+  setUserApproval,
+  getUpdateUnapprovedUsers,
 } from "../../redux/slices/userSlice";
-import { checkmarkCircle, closeCircle } from "ionicons/icons";
 
 export const ApprovalQueue: React.FC = () => {
   const dispatch = useDispatch();
@@ -37,15 +36,24 @@ export const ApprovalQueue: React.FC = () => {
   const TextContainerStyle = {
     display: "block",
   };
+  const updateUsers = useSelector(getUpdateUnapprovedUsers);
+
+  if (updateUsers === true) {
+    dispatch(fetchUnapprovedUsers());
+  }
 
   const unapprovedUsers = useSelector(getUnapprovedUsers);
 
   const approveBtnHandler = (index: number) => {
-    console.log(unapprovedUsers[index]);
+    dispatch(
+      setUserApproval(unapprovedUsers[index], { index: index, approved: true })
+    );
   };
 
   const rejectBtnHandler = (index: number) => {
-    console.log(unapprovedUsers[index]);
+    dispatch(
+      setUserApproval(unapprovedUsers[index], { index: index, approved: false })
+    );
   };
 
   if (finishedLoading) {
@@ -71,55 +79,101 @@ export const ApprovalQueue: React.FC = () => {
                 ""
               )}
               {/* TODO: Implement IonTab && IonGrid */}
-              {unapprovedUsers.length > 0
-                ? unapprovedUsers.map((unvUser, index) => {
-                    return (
-                      <IonCard key={index}>
-                        <IonCardHeader>
-                          <IonCardTitle>Email: {unvUser.email}</IonCardTitle>
-                        </IonCardHeader>
-                        <IonCardContent>
-                          <IonText style={TextContainerStyle}>
-                            Username: {unvUser.username}
-                          </IonText>
-                          <br />
-                          <IonText style={TextContainerStyle}>
-                            RequestedAccess Level: {unvUser.accessLevel}
-                          </IonText>
-                          <br />
-                          <IonText style={TextContainerStyle}>
-                            Verified:{" "}
-                            {unvUser.verified === true ? (
-                              <IonIcon color="success" icon={checkmarkCircle} />
-                            ) : (
-                              <IonIcon color="danger" icon={closeCircle} />
-                            )}
-                          </IonText>
-                          <IonButton
-                            type="submit"
-                            color="danger"
-                            onClick={(event: any) => {
-                              event.preventDefault();
-                              rejectBtnHandler(index);
-                            }}
-                          >
-                            Reject
-                          </IonButton>
-                          <IonButton
-                            type="submit"
-                            color="success"
-                            onClick={(event: any) => {
-                              event.preventDefault();
-                              approveBtnHandler(index);
-                            }}
-                          >
-                            Approve
-                          </IonButton>
-                        </IonCardContent>
-                      </IonCard>
-                    );
-                  })
-                : ""}
+              <IonGrid>
+                <IonRow>
+                  {unapprovedUsers.length > 0
+                    ? unapprovedUsers.map((unvUser, index) => {
+                        return (
+                          <IonCol key={index} size={"4"}>
+                            <IonCard>
+                              <IonCardHeader>
+                                <IonCardTitle>
+                                  Email: {unvUser.email}
+                                </IonCardTitle>
+                              </IonCardHeader>
+                              <IonCardContent>
+                                <IonText style={TextContainerStyle}>
+                                  <b>Username:</b> {unvUser.username}
+                                </IonText>
+                                <br />
+                                <IonText style={TextContainerStyle}>
+                                  <b>Requested Access Level:</b>{" "}
+                                  {unvUser.accessLevel}
+                                </IonText>
+                                <br />
+                                {unvUser.verified === true ? (
+                                  <IonText
+                                    style={TextContainerStyle}
+                                    color="success"
+                                  >
+                                    <b>Email Verified</b>
+                                  </IonText>
+                                ) : (
+                                  <IonText
+                                    style={TextContainerStyle}
+                                    color="danger"
+                                  >
+                                    <b>Email Unverified</b>
+                                  </IonText>
+                                )}
+                                <hr style={{ border: "1px solid grey" }} />
+                                <IonRow className="ion-align-items-center">
+                                  {unvUser.errorMessage ? (
+                                    <IonCol className="ion-align-self-center">
+                                      <IonText color="danger">
+                                        {unvUser.errorMessage}
+                                      </IonText>
+                                    </IonCol>
+                                  ) : (
+                                    ""
+                                  )}
+                                  {unvUser.updating ? (
+                                    <IonCol className="ion-align-self-center">
+                                      <IonText color="success">
+                                        Updating User Approval
+                                      </IonText>
+                                      <IonProgressBar type="indeterminate"></IonProgressBar>
+                                    </IonCol>
+                                  ) : (
+                                    ""
+                                  )}
+                                </IonRow>
+                                <IonRow className="ion-align-items-center">
+                                  <IonCol className="ion-align-self-center">
+                                    <IonButton
+                                      type="submit"
+                                      color="danger"
+                                      disabled={unvUser.updating}
+                                      onClick={(event: any) => {
+                                        event.preventDefault();
+                                        rejectBtnHandler(index);
+                                      }}
+                                    >
+                                      Reject
+                                    </IonButton>
+                                  </IonCol>
+                                  <IonCol className="ion-align-self-center">
+                                    <IonButton
+                                      type="submit"
+                                      color="success"
+                                      disabled={unvUser.updating}
+                                      onClick={(event: any) => {
+                                        event.preventDefault();
+                                        approveBtnHandler(index);
+                                      }}
+                                    >
+                                      Approve
+                                    </IonButton>
+                                  </IonCol>
+                                </IonRow>
+                              </IonCardContent>
+                            </IonCard>
+                          </IonCol>
+                        );
+                      })
+                    : ""}
+                </IonRow>
+              </IonGrid>
             </IonCardContent>
           </IonCard>
         </IonContent>

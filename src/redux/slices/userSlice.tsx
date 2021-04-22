@@ -2,9 +2,11 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunk, RootState } from "../store/store";
 import fetch from "cross-fetch";
 import {
+  approvalError,
   LoggedInUser,
   LoginRequestUser,
   RegistrationRequest,
+  userApprovalUpdate,
   VerifyUser,
 } from "../interfaces/interfaces";
 import * as constants from "../../constants";
@@ -42,6 +44,7 @@ const initialState = {
   unapprovedUsers,
   fetchingUnapprovedUsers: false,
   fetchingUnapprovedUsersErrorMessage: "",
+  updateUnapprovedUsers: false,
 };
 
 // Redux Slice
@@ -125,10 +128,34 @@ const userSlice = createSlice({
     ) => {
       state.unapprovedUsers = action.payload;
       state.fetchingUnapprovedUsers = false;
+      state.updateUnapprovedUsers = false;
     },
     unapprovedUsersFailure: (state, action: PayloadAction<string>) => {
       state.fetchingUnapprovedUsersErrorMessage = action.payload;
       state.fetchingUnapprovedUsers = false;
+    },
+    updateUserApprovalFailure: (
+      state,
+      action: PayloadAction<approvalError>
+    ) => {
+      state.unapprovedUsers[action.payload.index].errorMessage =
+        action.payload.errorMessage;
+      state.unapprovedUsers[action.payload.index].updating = false;
+    },
+    setUnapprovedUserUpdating: (
+      state,
+      action: PayloadAction<userApprovalUpdate>
+    ) => {
+      state.unapprovedUsers[action.payload.index].updating = true;
+      state.unapprovedUsers[action.payload.index].approved =
+        action.payload.approved;
+    },
+    updateUnapprovedUserSuccess: (
+      state,
+      action: PayloadAction<userApprovalUpdate>
+    ) => {
+      state.unapprovedUsers[action.payload.index].updating = false;
+      state.updateUnapprovedUsers = true;
     },
   },
 });
@@ -150,6 +177,9 @@ export const {
   setFetchingUnapprovedUsers,
   unapprovedUsersSuccessful,
   unapprovedUsersFailure,
+  setUnapprovedUserUpdating,
+  updateUnapprovedUserSuccess,
+  updateUserApprovalFailure,
 } = userSlice.actions;
 
 // Selectors
@@ -179,6 +209,8 @@ export const getUnapprovedUsers = (state: RootState) =>
   state.user.unapprovedUsers;
 export const getFetchingUnapprovedUsers = (state: RootState) =>
   state.user.fetchingUnapprovedUsers;
+export const getUpdateUnapprovedUsers = (state: RootState) =>
+  state.user.updateUnapprovedUsers;
 export const getUnapprovedUsersErrorMessage = (state: RootState) =>
   state.user.fetchingUnapprovedUsersErrorMessage;
 
@@ -367,6 +399,49 @@ export const fetchUnapprovedUsers = (): AppThunk => (dispatch) => {
     },
     (error) => {
       console.log(error);
+    }
+  );
+};
+
+export const setUserApproval = (
+  user: unapprovedUser,
+  approvalUpdate: userApprovalUpdate
+): AppThunk => (dispatch) => {
+  // Dispatch that we are sending
+  dispatch(setUnapprovedUserUpdating(approvalUpdate));
+  fetch(`${apiUrl}/approve`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: user.email,
+      approved: approvalUpdate.approved,
+    }),
+  }).then(
+    (resRaw) => {
+      resRaw.json().then((response) => {
+        if (response.message === constants.STATUS.SUCCESS) {
+          dispatch(updateUnapprovedUserSuccess(approvalUpdate));
+        } else {
+          // Failure
+          dispatch(
+            updateUserApprovalFailure({
+              index: approvalUpdate.index,
+              errorMessage: response.description,
+            })
+          );
+        }
+      });
+    },
+    (error) => {
+      console.log(error);
+      dispatch(
+        updateUserApprovalFailure({
+          index: approvalUpdate.index,
+          errorMessage: error,
+        })
+      );
     }
   );
 };

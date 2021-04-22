@@ -140,6 +140,37 @@ export async function updateUserVerification(email) {
 }
 
 /**
+ * updateUserApproval - Sets the users' approved flag to true in the FaunaDB.
+ * @param {string} email
+ * @returns {Promise} Promise from the Fauna Client once the update is completed or failed.
+ */
+export async function updateUserApproval(email, approved) {
+  return new Promise((resolve, reject) => {
+    clientFauna
+      .query(
+        query.Update(
+          query.Select(
+            ["ref"],
+            query.Get(query.Match(query.Index("users_by_email"), email))
+          ),
+          {
+            data: {
+              approved,
+            },
+          }
+        )
+      )
+      .then((response) => {
+        resolve(constants.STATUS.SUCCESS);
+      })
+
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+/**
  * getUserVerifyApprove - Returns an object containing two fields, verify and approve, based on the FaunaDB State.
  * @param {string} email
  * @returns {Promise} Promise from the Fauna Client
