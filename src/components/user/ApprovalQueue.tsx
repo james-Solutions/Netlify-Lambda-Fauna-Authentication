@@ -19,6 +19,7 @@ import {
   IonTab,
 } from "@ionic/react";
 import { useDispatch, useSelector } from "react-redux";
+import { Redirect } from "react-router-dom";
 import {
   fetchUnapprovedUsers,
   getUnapprovedUsers,
@@ -26,7 +27,9 @@ import {
   setUserApproval,
   getUpdateUnapprovedUsers,
   getUnapprovedUsersErrorMessage,
+  getUserAccessLevel,
 } from "../../redux/slices/userSlice";
+import * as constants from "../../constants";
 
 export const ApprovalQueue: React.FC = () => {
   const dispatch = useDispatch();
@@ -43,6 +46,7 @@ export const ApprovalQueue: React.FC = () => {
   const queueErrorMessage = useSelector(getUnapprovedUsersErrorMessage);
   const updateUsers = useSelector(getUpdateUnapprovedUsers);
   const unapprovedUsers = useSelector(getUnapprovedUsers);
+  const userAccessLevel = useSelector(getUserAccessLevel);
 
   if (updateUsers === true) {
     dispatch(fetchUnapprovedUsers());
@@ -60,7 +64,12 @@ export const ApprovalQueue: React.FC = () => {
     );
   };
 
-  if (finishedLoading) {
+  if (userAccessLevel !== constants.ACCESS_LEVELS.ROOT) {
+    return <Redirect to="/" />;
+  } else if (
+    finishedLoading &&
+    userAccessLevel === constants.ACCESS_LEVELS.ROOT
+  ) {
     return (
       <IonPage>
         <IonHeader>
@@ -222,7 +231,7 @@ export const ApprovalQueue: React.FC = () => {
         </IonContent>
       </IonPage>
     );
-  } else {
+  } else if (userAccessLevel === constants.ACCESS_LEVELS.ROOT) {
     return (
       <IonPage>
         <IonHeader>
@@ -238,6 +247,26 @@ export const ApprovalQueue: React.FC = () => {
             <IonCardContent>
               <IonText>Fetching Users</IonText>
               <IonProgressBar type="indeterminate"></IonProgressBar>
+            </IonCardContent>
+          </IonCard>
+        </IonContent>
+      </IonPage>
+    );
+  } else {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>User Approval Queue</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Users pending approval</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonText color="danger">ACCESS RESTRICTED.</IonText>
             </IonCardContent>
           </IonCard>
         </IonContent>

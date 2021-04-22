@@ -185,6 +185,8 @@ export const {
 // Selectors
 export const getIsAuth = (state: RootState) => state.user.isAuth;
 export const getUser = (state: RootState) => state.user.user;
+export const getUserAccessLevel = (state: RootState) =>
+  state.user.user.accessLevel;
 export const getRegistrationSuccess = (state: RootState) =>
   state.user.registrationSuccess;
 export const getSendingRegistration = (state: RootState) =>
@@ -237,7 +239,6 @@ export const registrationRequest = (user: RegistrationRequest): AppThunk => (
         if (response.message === constants.STATUS.SUCCESS) {
           dispatch(registrationSuccessful());
         } else {
-          console.log(response);
           dispatch(registrationFailure(response.description));
         }
       });
