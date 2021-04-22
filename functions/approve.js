@@ -1,10 +1,10 @@
 const constants = require("../api-utils/constants");
-const { getUnverifiedUsers } = require("../api-utils/User");
+const { getUnapprovedUsers } = require("../api-utils/User");
 
 exports.handler = (event, context, callback) => {
   if (event.httpMethod === "POST") {
   } else if (event.httpMethod === "GET") {
-    getUnverifiedUsers()
+    getUnapprovedUsers()
       .then((response) => {
         return callback(null, {
           statusCode: 200,

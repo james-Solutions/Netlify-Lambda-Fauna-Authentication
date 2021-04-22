@@ -1,4 +1,4 @@
-export interface unverifiedUser {
+export interface unapprovedUser {
   email: string;
   username: string;
   accessLevel: string;

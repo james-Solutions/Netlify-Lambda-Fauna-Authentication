@@ -262,7 +262,11 @@ export function generateCode() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
-export async function getUnverifiedUsers() {
+/**
+ * getUnapprovedUsers - Returns all
+ * @returns {Array<unapprovedUser>} Array of Objects, where each is a user account of the Interface unapprovedUser
+ */
+export async function getUnapprovedUsers() {
   return new Promise((resolve, reject) => {
     let helper = clientFauna.paginate(
       query.Match(query.Index("users_unapproved"), false)
