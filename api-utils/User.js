@@ -25,7 +25,10 @@ export function createUser(userData) {
         username: userData.username,
         accessLevel: userData.accessLevel,
         verified: false,
-        approved: false,
+        approved:
+          userData.accessLevel === constants.ACCESS_LEVELS.STUDENT
+            ? true
+            : false,
       },
     })
   );

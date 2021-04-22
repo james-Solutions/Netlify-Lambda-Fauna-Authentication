@@ -28,6 +28,7 @@ import {
   getSendingRegistration,
   getRegistrationErrorMessage,
 } from "../../redux/slices/userSlice";
+import * as constants from "../../constants";
 
 export const Registration: React.FC = () => {
   const dispatch = useDispatch();
@@ -349,14 +350,18 @@ export const Registration: React.FC = () => {
               <br />
               <IonText style={{ display: "block" }}>
                 An email will be sent with a one time code that lasts 24 hours
-                to complete your verification.
+                to complete your verification. Then you will be able to login.
               </IonText>
               <br />
-              <IonText style={{ display: "block" }}>
-                Once you have verified your account via the code sent in the
-                email, which you should receive soon, and your account has been
-                approved. Then you will be able to login.
-              </IonText>
+              {selected !== constants.ACCESS_LEVELS.STUDENT ? (
+                <IonText style={{ display: "block" }}>
+                  You have requested a {selected} account. This requires
+                  approval and verification. You will be notified via email upon
+                  your approval or rejection.
+                </IonText>
+              ) : (
+                ""
+              )}
             </IonCardContent>
           </IonCard>
         </IonContent>

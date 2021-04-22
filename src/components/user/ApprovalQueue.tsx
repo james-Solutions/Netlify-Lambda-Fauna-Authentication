@@ -20,32 +20,32 @@ import {
 } from "@ionic/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchUnverifiedUsers,
-  getUnverifiedUsers,
+  fetchUnapprovedUsers,
+  getUnapprovedUsers,
+  getFetchingUnapprovedUsers,
 } from "../../redux/slices/userSlice";
-import * as constants from "../../constants";
-import { checkmark, checkmarkCircle, closeCircle } from "ionicons/icons";
+import { checkmarkCircle, closeCircle } from "ionicons/icons";
 
 export const ApprovalQueue: React.FC = () => {
   const dispatch = useDispatch();
   const [finishedLoading, setFinishedLoading] = useState<boolean>(false);
   useEffect(() => {
-    dispatch(fetchUnverifiedUsers());
+    dispatch(fetchUnapprovedUsers());
     setFinishedLoading(true);
   }, []);
-
+  const fetchingUnapprovedUsers = useSelector(getFetchingUnapprovedUsers);
   const TextContainerStyle = {
     display: "block",
   };
 
-  const unverifiedUsers = useSelector(getUnverifiedUsers);
+  const unapprovedUsers = useSelector(getUnapprovedUsers);
 
   const approveBtnHandler = (index: number) => {
-    console.log(unverifiedUsers[index]);
+    console.log(unapprovedUsers[index]);
   };
 
   const rejectBtnHandler = (index: number) => {
-    console.log(unverifiedUsers[index]);
+    console.log(unapprovedUsers[index]);
   };
 
   if (finishedLoading) {
@@ -62,9 +62,17 @@ export const ApprovalQueue: React.FC = () => {
               <IonCardTitle>Users pending approval</IonCardTitle>
             </IonCardHeader>
             <IonCardContent>
+              {fetchingUnapprovedUsers === true ? (
+                <div>
+                  <IonText>Fetching Users</IonText>
+                  <IonProgressBar type="indeterminate"></IonProgressBar>
+                </div>
+              ) : (
+                ""
+              )}
               {/* TODO: Implement IonTab && IonGrid */}
-              {unverifiedUsers.length > 0
-                ? unverifiedUsers.map((unvUser, index) => {
+              {unapprovedUsers.length > 0
+                ? unapprovedUsers.map((unvUser, index) => {
                     return (
                       <IonCard key={index}>
                         <IonCardHeader>
@@ -131,9 +139,7 @@ export const ApprovalQueue: React.FC = () => {
               <IonCardTitle>Users pending approval</IonCardTitle>
             </IonCardHeader>
             <IonCardContent>
-              <IonItem>
-                <IonLabel>Fetching Users</IonLabel>
-              </IonItem>
+              <IonText>Fetching Users</IonText>
               <IonProgressBar type="indeterminate"></IonProgressBar>
             </IonCardContent>
           </IonCard>

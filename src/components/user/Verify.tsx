@@ -151,13 +151,7 @@ export const Verify: React.FC<Props> = (props: Props) => {
               </IonCardTitle>
             </IonCardHeader>
             <IonCardContent>
-              <IonItem>
-                Your account is now verified. If it is{" "}
-                <u style={{ display: "contents" }}>
-                  <b style={{ display: "contents" }}>approved</b>
-                </u>{" "}
-                as well, you may login.
-              </IonItem>
+              <IonItem>Thank you for verifying your email and account.</IonItem>
             </IonCardContent>
           </IonCard>
         </IonContent>
