@@ -27,6 +27,15 @@ exports.handler = (event, context, callback) => {
               description: constants.USER_ERRORS.USER_NOT_VERIFIED,
             }),
           });
+        } else if (response.approved === false && response.rejected === true) {
+          return callback(null, {
+            statusCode: 200,
+            headers: constants.HEADERS,
+            body: JSON.stringify({
+              message: constants.STATUS.FAILURE,
+              description: constants.USER_ERRORS.REJECTED_USER,
+            }),
+          });
         } else if (response.approved === false) {
           return callback(null, {
             statusCode: 200,

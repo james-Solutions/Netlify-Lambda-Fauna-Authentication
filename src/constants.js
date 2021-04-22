@@ -7,6 +7,8 @@ export const USER_ERRORS = {
   USER_NOT_APPROVED: "User has not approved to login",
   USER_NOT_VERIFIED: "User has not verified their email",
   USER_NOT_UNIQUE: "Email already exists",
+  NO_UNAPPROVED_USERS: "All users are approved",
+  REJECTED_USER: "Users account has been rejected",
 };
 
 export const FAUNA_ERRORS = {
@@ -34,6 +36,6 @@ export const HEADERS = {
 
 export const ACCESS_LEVELS = {
   STUDENT: "Student",
-  ADMIN: "Admin",
+  ADMIN: "Administrator",
   ROOT: "Root",
 };

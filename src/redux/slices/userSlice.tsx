@@ -237,6 +237,7 @@ export const registrationRequest = (user: RegistrationRequest): AppThunk => (
         if (response.message === constants.STATUS.SUCCESS) {
           dispatch(registrationSuccessful());
         } else {
+          console.log(response);
           dispatch(registrationFailure(response.description));
         }
       });

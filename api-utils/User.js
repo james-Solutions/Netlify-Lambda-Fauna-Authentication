@@ -29,6 +29,7 @@ export function createUser(userData) {
           userData.accessLevel === constants.ACCESS_LEVELS.STUDENT
             ? true
             : false,
+        rejected: false,
       },
     })
   );
@@ -156,6 +157,7 @@ export async function updateUserApproval(email, approved) {
           {
             data: {
               approved,
+              rejected: !approved,
             },
           }
         )
@@ -183,6 +185,7 @@ export async function getUserVerifyApprove(email) {
     const response = {
       verified: false,
       approved: false,
+      rejected: false,
     };
     helper
       .map((ref) => {
@@ -192,6 +195,7 @@ export async function getUserVerifyApprove(email) {
         if (page.length > 0) {
           response.verified = page[0].data.verified;
           response.approved = page[0].data.approved;
+          response.rejected = page[0].data.rejected;
         } else {
           reject(constants.USER_ERRORS.USER_DOES_NOT_EXIST);
         }
@@ -289,6 +293,47 @@ export async function sendVerifyCode(userData, code) {
 }
 
 /**
+ * sendUpdateEmail - Sends the code using the email field in the userData object.
+ * @param {object} userData
+ * @param {number} code
+ * @returns {Promise}
+ */
+export async function sendApprovalUpdateEmail(email, approved) {
+  return new Promise((resolve, reject) => {
+    clientSparkpost.transmissions
+      .send({
+        content: {
+          from: "verification@sparkpost.studying.solutions",
+          subject: `SSP Email Account Approval Status Notification`,
+          html: approved
+            ? `
+                  <html>
+                    <body>
+                      <p>Thank you for signing up for the Student Scheduler Planner (SSP).</p>
+                      <p>Your Account has been approved. If you are verified as well, you may now login at the link below.</p>
+                      <a href=${constants.URL.DOMAIN}/user/login>Login Here</a>
+                    </body>
+                  </html>`
+            : `
+                  <html>
+                    <body>
+                      <p>Thank you for signing up for the Student Scheduler Planner (SSP).</p>
+                      <p>Your Account has been rejected. Thank you for your consideration. </p>
+                    </body>
+                  </html>`,
+        },
+        recipients: [{ address: email }],
+      })
+      .then((data) => {
+        resolve(constants.STATUS.SUCCESS);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+/**
  * generateCode - Returns a number that is 6 digits long and does not start with 0
  * @returns {number} Random number that is not 0 and is 6 digits log
  */
@@ -303,7 +348,7 @@ export function generateCode() {
 export async function getUnapprovedUsers() {
   return new Promise((resolve, reject) => {
     let helper = clientFauna.paginate(
-      query.Match(query.Index("users_unapproved"), false)
+      query.Match(query.Index("users_unapproved"), false, false)
     );
     const response = [];
     helper
@@ -322,6 +367,6 @@ export async function getUnapprovedUsers() {
       .then(() => {
         resolve(response);
       })
-      .catch((error) => reject(error));
+      .catch((error) => reject(error.description));
   });
 }

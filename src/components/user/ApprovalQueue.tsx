@@ -15,6 +15,8 @@ import {
   IonRow,
   IonGrid,
   IonCol,
+  IonTabs,
+  IonTab,
 } from "@ionic/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -23,6 +25,7 @@ import {
   getFetchingUnapprovedUsers,
   setUserApproval,
   getUpdateUnapprovedUsers,
+  getUnapprovedUsersErrorMessage,
 } from "../../redux/slices/userSlice";
 
 export const ApprovalQueue: React.FC = () => {
@@ -32,17 +35,18 @@ export const ApprovalQueue: React.FC = () => {
     dispatch(fetchUnapprovedUsers());
     setFinishedLoading(true);
   }, []);
-  const fetchingUnapprovedUsers = useSelector(getFetchingUnapprovedUsers);
   const TextContainerStyle = {
     display: "block",
   };
+
+  const fetchingUnapprovedUsers = useSelector(getFetchingUnapprovedUsers);
+  const queueErrorMessage = useSelector(getUnapprovedUsersErrorMessage);
   const updateUsers = useSelector(getUpdateUnapprovedUsers);
+  const unapprovedUsers = useSelector(getUnapprovedUsers);
 
   if (updateUsers === true) {
     dispatch(fetchUnapprovedUsers());
   }
-
-  const unapprovedUsers = useSelector(getUnapprovedUsers);
 
   const approveBtnHandler = (index: number) => {
     dispatch(
@@ -65,11 +69,51 @@ export const ApprovalQueue: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <IonContent>
+          {/* <IonTabs>
+                <IonRouterOutlet>
+                  <Redirect exact path="/tabs" to="/tabs/schedule" />
+                  Using the render method prop cuts down the number of renders your components will have due to route changes.
+                  Use the component prop when your component depends on the RouterComponentProps passed in automatically.
+                  
+                  <Route path="/tabs/schedule" render={() => <SchedulePage />} exact={true} />
+                  <Route path="/tabs/speakers" render={() => <SpeakerList />} exact={true} />
+                  <Route path="/tabs/speakers/:id" component={SpeakerDetail} exact={true} />
+                  <Route path="/tabs/schedule/:id" component={SessionDetail} />
+                  <Route path="/tabs/speakers/sessions/:id" component={SessionDetail} />
+                  <Route path="/tabs/map" render={() => <MapView />} exact={true} />
+                  <Route path="/tabs/about" render={() => <About />} exact={true} />
+                </IonRouterOutlet>
+                <IonTabBar slot="bottom">
+                  <IonTabButton tab="schedule" href="/tabs/schedule">
+                    <IonIcon icon={calendar} />
+                    <IonLabel>Schedule</IonLabel>
+                  </IonTabButton>
+                  <IonTabButton tab="speakers" href="/tabs/speakers">
+                    <IonIcon icon={people} />
+                    <IonLabel>Speakers</IonLabel>
+                  </IonTabButton>
+                  <IonTabButton tab="map" href="/tabs/map">
+                    <IonIcon icon={location} />
+                    <IonLabel>Map</IonLabel>
+                  </IonTabButton>
+                  <IonTabButton tab="about" href="/tabs/about">
+                  <IonIcon icon={informationCircle} />
+                  <IonLabel>About</IonLabel>
+                    </IonTabButton>
+                </IonTabBar>
+              </IonTabs> */}
           <IonCard>
             <IonCardHeader>
               <IonCardTitle>Users pending approval</IonCardTitle>
             </IonCardHeader>
             <IonCardContent>
+              {queueErrorMessage ? (
+                <IonText color="danger">
+                  <b>Error:</b> {queueErrorMessage}
+                </IonText>
+              ) : (
+                ""
+              )}
               {fetchingUnapprovedUsers === true ? (
                 <div>
                   <IonText>Fetching Users</IonText>
@@ -78,7 +122,6 @@ export const ApprovalQueue: React.FC = () => {
               ) : (
                 ""
               )}
-              {/* TODO: Implement IonTab && IonGrid */}
               <IonGrid>
                 <IonRow>
                   {unapprovedUsers.length > 0
@@ -129,7 +172,7 @@ export const ApprovalQueue: React.FC = () => {
                                   )}
                                   {unvUser.updating ? (
                                     <IonCol className="ion-align-self-center">
-                                      <IonText color="success">
+                                      <IonText color="secondary">
                                         Updating User Approval
                                       </IonText>
                                       <IonProgressBar type="indeterminate"></IonProgressBar>
