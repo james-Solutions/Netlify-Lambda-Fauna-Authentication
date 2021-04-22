@@ -37,6 +37,9 @@ const initialState = {
   verificationError: false,
   verificationErrorMessage: "",
   verificationSending: false,
+  unverifiedUsers: [],
+  fetchingUnverifiedUsers: false,
+  fetchingUnverifiedUsersErrorMessage: "",
 };
 
 // Redux Slice
@@ -111,6 +114,17 @@ const userSlice = createSlice({
     setVerificationMessage: (state, action: PayloadAction<string>) => {
       state.verificationErrorMessage = action.payload;
     },
+    setFetchingUnverifiedUsers: (state) => {
+      state.fetchingUnverifiedUsers = true;
+    },
+    unverifiedUsersSuccessful: (state, action: PayloadAction<Array<never>>) => {
+      state.unverifiedUsers = action.payload;
+      state.fetchingUnverifiedUsers = false;
+    },
+    unverifiedUsersFailure: (state, action: PayloadAction<string>) => {
+      state.fetchingUnverifiedUsersErrorMessage = action.payload;
+      state.fetchingUnverifiedUsers = false;
+    },
   },
 });
 
@@ -128,6 +142,9 @@ export const {
   setVerificationFailure,
   setVerificationSending,
   setVerificationMessage,
+  setFetchingUnverifiedUsers,
+  unverifiedUsersSuccessful,
+  unverifiedUsersFailure,
 } = userSlice.actions;
 
 // Selectors
@@ -153,6 +170,12 @@ export const getVerificationErrorMessage = (state: RootState) =>
   state.user.verificationErrorMessage;
 export const getVerificationSending = (state: RootState) =>
   state.user.verificationSending;
+export const getUnverifiedUsers = (state: RootState) =>
+  state.user.unverifiedUsers;
+export const getFetchingUnverifiedUsers = (state: RootState) =>
+  state.user.fetchingUnverifiedUsers;
+export const getUnverifiedUsersErrorMessage = (state: RootState) =>
+  state.user.fetchingUnverifiedUsersErrorMessage;
 
 export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   dispatch
@@ -313,6 +336,32 @@ export const verifyVerificationCode = (user: {
     },
     (error) => {
       dispatch(setVerificationFailure(error));
+    }
+  );
+};
+
+export const fetchUnverifiedUsers = (): AppThunk => (dispatch) => {
+  dispatch(setFetchingUnverifiedUsers());
+  // Fetch
+  fetch(`${apiUrl}/approve`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then(
+    (resRaw) => {
+      resRaw.json().then((response) => {
+        if (response.message === constants.STATUS.SUCCESS) {
+          // Success
+          dispatch(unverifiedUsersSuccessful(response.users));
+        } else {
+          // Failure
+          dispatch(unverifiedUsersFailure(response.description));
+        }
+      });
+    },
+    (error) => {
+      console.log(error);
     }
   );
 };
