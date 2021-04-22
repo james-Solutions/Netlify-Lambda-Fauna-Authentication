@@ -20,11 +20,16 @@ import {
   homeSharp,
   logOutOutline,
   logOutSharp,
+  bookOutline,
+  bookSharp,
+  bookmarksOutline,
+  bookmarksSharp,
 } from "ionicons/icons";
 import "./Menu.css";
 
 import { getIsAuth, getUser } from "../redux/slices/userSlice";
 import { useSelector } from "react-redux";
+import * as constants from "../constants";
 
 interface AppPage {
   url: string;
@@ -60,6 +65,27 @@ const loggedInAppPages: AppPage[] = [
     url: "/user/logout",
     iosIcon: logOutOutline,
     mdIcon: logOutSharp,
+  },
+];
+
+const AdminRootAppPages: AppPage[] = [
+  {
+    title: "User Approval Queue",
+    url: "/approve",
+    iosIcon: personAddOutline,
+    mdIcon: personAddSharp,
+  },
+  {
+    title: "Catalog",
+    url: "/catalog",
+    iosIcon: bookOutline,
+    mdIcon: bookSharp,
+  },
+  {
+    title: "Section",
+    url: "/section",
+    iosIcon: bookmarksOutline,
+    mdIcon: bookmarksSharp,
   },
 ];
 
@@ -118,6 +144,32 @@ const Menu: React.FC = () => {
                   </IonMenuToggle>
                 );
               })}
+          {isAuth === true &&
+          (user.accessLevel === constants.ACCESS_LEVELS.ADMIN ||
+            user.accessLevel === constants.ACCESS_LEVELS.ROOT)
+            ? AdminRootAppPages.map((appPage, index) => {
+                return (
+                  <IonMenuToggle key={index} autoHide={false}>
+                    <IonItem
+                      className={
+                        location.pathname === appPage.url ? "selected" : ""
+                      }
+                      routerLink={appPage.url}
+                      routerDirection="none"
+                      lines="none"
+                      detail={false}
+                    >
+                      <IonIcon
+                        slot="start"
+                        ios={appPage.iosIcon}
+                        md={appPage.mdIcon}
+                      />
+                      <IonLabel>{appPage.title}</IonLabel>
+                    </IonItem>
+                  </IonMenuToggle>
+                );
+              })
+            : ""}
         </IonList>
       </IonContent>
     </IonMenu>

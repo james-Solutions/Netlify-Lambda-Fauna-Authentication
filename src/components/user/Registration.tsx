@@ -19,6 +19,7 @@ import {
   IonItemDivider,
   IonToast,
   IonProgressBar,
+  IonText,
 } from "@ionic/react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -342,18 +343,20 @@ export const Registration: React.FC = () => {
               <IonCardTitle>Registration Request Successful</IonCardTitle>
             </IonCardHeader>
             <IonCardContent>
-              <IonItem>
-                <IonLabel>You must now verify your email account.</IonLabel>
-                <IonLabel>
-                  An email will be sent with a one time code that lasts 24 hours
-                  to complete your verification.
-                </IonLabel>
-                <IonLabel>
-                  Once you have verified your account via email, which you
-                  should receive soon, and your account has been approved. Then
-                  you will be able to login.
-                </IonLabel>
-              </IonItem>
+              <IonText style={{ display: "block" }}>
+                You must now verify your email account.
+              </IonText>
+              <br />
+              <IonText style={{ display: "block" }}>
+                An email will be sent with a one time code that lasts 24 hours
+                to complete your verification.
+              </IonText>
+              <br />
+              <IonText style={{ display: "block" }}>
+                Once you have verified your account via the code sent in the
+                email, which you should receive soon, and your account has been
+                approved. Then you will be able to login.
+              </IonText>
             </IonCardContent>
           </IonCard>
         </IonContent>

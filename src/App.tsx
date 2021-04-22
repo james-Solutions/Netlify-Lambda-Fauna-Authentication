@@ -10,6 +10,7 @@ import { Registration } from "./components/user/Registration";
 import { Login } from "./components/user/Login";
 import { Logout } from "./components/user/Logout";
 import { Verify } from "./components/user/Verify";
+import { ApprovalQueue } from "./components/user/ApprovalQueue";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -40,19 +41,16 @@ const App: React.FC = () => {
             <Route path="/" exact={true}>
               <Redirect to="/user/login" />
             </Route>
-            <Route path="/home" exact={true}>
-              <Home />
-            </Route>
-            <Route path="/user/login" exact={true}>
-              <Login />
-            </Route>
-            <Route path="/user/logout" exact={true}>
-              <Logout />
-            </Route>
-            <Route path="/user/register" exact={true}>
-              <Registration />
-            </Route>
+            <Route path="/home" exact={true} component={Home} />
+            <Route path="/user/login" exact={true} component={Login} />
+            <Route path="/user/logout" exact={true} component={Logout} />
+            <Route
+              path="/user/register"
+              exact={true}
+              component={Registration}
+            />
             <Route path="/user/verify/:email" component={Verify} />
+            <Route path="/approve" exact={true} component={ApprovalQueue} />
           </IonRouterOutlet>
         </IonSplitPane>
       </IonReactRouter>

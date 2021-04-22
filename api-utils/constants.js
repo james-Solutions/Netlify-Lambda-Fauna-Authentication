@@ -7,6 +7,7 @@ export const USER_ERRORS = {
   USER_NOT_APPROVED: "User has not approved to login",
   USER_NOT_VERIFIED: "User has not verified their email",
   USER_NOT_UNIQUE: "Email already exists",
+  NO_UNAPPROVED_USERS: "All users are approved",
 };
 
 export const FAUNA_ERRORS = {

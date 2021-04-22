@@ -232,7 +232,7 @@ export async function sendVerifyCode(userData, code) {
       .send({
         content: {
           from: "verification@sparkpost.studying.solutions",
-          subject: `${userData.email}, email verification for SSP Account`,
+          subject: `SSP Email Verification for SSP Account`,
           html: `
                   <html>
                     <body>
@@ -260,4 +260,30 @@ export async function sendVerifyCode(userData, code) {
  */
 export function generateCode() {
   return Math.floor(100000 + Math.random() * 900000);
+}
+
+export async function getUnverifiedUsers() {
+  return new Promise((resolve, reject) => {
+    let helper = clientFauna.paginate(
+      query.Match(query.Index("users_unverified"), false)
+    );
+    const response = [];
+    helper
+      .map((ref) => {
+        return query.Get(ref);
+      })
+      .each((page) => {
+        if (page.length > 0) {
+          for (let i = 0; i < page.length; i++) {
+            response.push(page[i].data);
+          }
+        } else {
+          reject(constants.USER_ERRORS.NO_UNAPPROVED_USERS);
+        }
+      })
+      .then(() => {
+        resolve(response);
+      })
+      .catch((error) => reject(error));
+  });
 }
