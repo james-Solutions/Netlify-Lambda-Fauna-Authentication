@@ -1,10 +1,9 @@
-# scheduler
+# Netlify Lambda Fauna Authentication
 
 ## Starting the local development environment.
 
+```
 Clone the Repo
 npm install
-
-Starting requires 2 environment variables:
-
-REACT_APP_FAUNA_SECRET=secret REACT_APP_SPARKPOST=secret npm start
+REACT_APP_FAUNA_SECRET=your_secret REACT_APP_SPARKPOST=your_secret npm start
+```

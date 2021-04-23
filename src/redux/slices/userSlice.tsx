@@ -15,7 +15,7 @@ const cookie = require("react-cookies");
 
 let apiUrl = "/.netlify/functions";
 
-if (process.env.REACT_APP_DEV === "true") {
+if (process.env.NODE_ENV !== "production") {
   apiUrl = "http://localhost:9000" + apiUrl;
 }
 
