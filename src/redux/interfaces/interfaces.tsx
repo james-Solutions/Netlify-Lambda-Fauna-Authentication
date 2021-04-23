@@ -20,3 +20,14 @@ export interface RegistrationRequest {
 export interface VerifyUser {
   email: string;
 }
+
+export interface userApprovalUpdate {
+  index: number;
+  approved: boolean;
+  rejected: boolean;
+}
+
+export interface approvalError {
+  index: number;
+  errorMessage: string;
+}

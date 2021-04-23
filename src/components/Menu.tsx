@@ -20,11 +20,20 @@ import {
   homeSharp,
   logOutOutline,
   logOutSharp,
+  bookOutline,
+  bookSharp,
+  bookmarksOutline,
+  bookmarksSharp,
+  settingsOutline,
+  settingsSharp,
+  calendarOutline,
+  calendarSharp,
 } from "ionicons/icons";
 import "./Menu.css";
 
 import { getIsAuth, getUser } from "../redux/slices/userSlice";
 import { useSelector } from "react-redux";
+import * as constants from "../constants";
 
 interface AppPage {
   url: string;
@@ -32,6 +41,14 @@ interface AppPage {
   mdIcon: string;
   title: string;
 }
+
+// TODO: reformat these as
+// notAuthPages
+// AuthPages (Home, Scheduler, etc)
+// Approval Queue (If Root)
+// Catalog (If > Admin)
+// Section (If > Admin)
+// Logout (isAuth)
 
 const loggedOutAppPages: AppPage[] = [
   {
@@ -56,10 +73,47 @@ const loggedInAppPages: AppPage[] = [
     mdIcon: homeSharp,
   },
   {
-    title: "Logout",
-    url: "/user/logout",
-    iosIcon: logOutOutline,
-    mdIcon: logOutSharp,
+    title: "Schedule",
+    url: "/schedule",
+    iosIcon: calendarOutline,
+    mdIcon: calendarSharp,
+  },
+  {
+    title: "Student Settings",
+    url: "/student/settings",
+    iosIcon: settingsOutline,
+    mdIcon: settingsSharp,
+  },
+];
+
+const logoutPage: AppPage = {
+  title: "Logout",
+  url: "/user/logout",
+  iosIcon: logOutOutline,
+  mdIcon: logOutSharp,
+};
+
+const RootAppPages: AppPage[] = [
+  {
+    title: "User Approval Queue",
+    url: "/approve",
+    iosIcon: personAddOutline,
+    mdIcon: personAddSharp,
+  },
+];
+
+const AdminRootAppPages: AppPage[] = [
+  {
+    title: "Catalog Management",
+    url: "/catalog",
+    iosIcon: bookOutline,
+    mdIcon: bookSharp,
+  },
+  {
+    title: "Section Management",
+    url: "/section",
+    iosIcon: bookmarksOutline,
+    mdIcon: bookmarksSharp,
   },
 ];
 
@@ -118,6 +172,79 @@ const Menu: React.FC = () => {
                   </IonMenuToggle>
                 );
               })}
+          {isAuth === true &&
+          user.accessLevel === constants.USER.ACCESS_LEVELS.ROOT
+            ? RootAppPages.map((appPage, index) => {
+                return (
+                  <IonMenuToggle key={index} autoHide={false}>
+                    <IonItem
+                      className={
+                        location.pathname === appPage.url ? "selected" : ""
+                      }
+                      routerLink={appPage.url}
+                      routerDirection="none"
+                      lines="none"
+                      detail={false}
+                    >
+                      <IonIcon
+                        slot="start"
+                        ios={appPage.iosIcon}
+                        md={appPage.mdIcon}
+                      />
+                      <IonLabel>{appPage.title}</IonLabel>
+                    </IonItem>
+                  </IonMenuToggle>
+                );
+              })
+            : ""}
+          {isAuth === true &&
+          (user.accessLevel === constants.USER.ACCESS_LEVELS.ADMIN ||
+            user.accessLevel === constants.USER.ACCESS_LEVELS.ROOT)
+            ? AdminRootAppPages.map((appPage, index) => {
+                return (
+                  <IonMenuToggle key={index} autoHide={false}>
+                    <IonItem
+                      className={
+                        location.pathname === appPage.url ? "selected" : ""
+                      }
+                      routerLink={appPage.url}
+                      routerDirection="none"
+                      lines="none"
+                      detail={false}
+                    >
+                      <IonIcon
+                        slot="start"
+                        ios={appPage.iosIcon}
+                        md={appPage.mdIcon}
+                      />
+                      <IonLabel>{appPage.title}</IonLabel>
+                    </IonItem>
+                  </IonMenuToggle>
+                );
+              })
+            : ""}
+          {isAuth === true ? (
+            <IonMenuToggle autoHide={false}>
+              <IonItem
+                className={
+                  location.pathname === logoutPage.url ? "selected" : ""
+                }
+                routerLink={logoutPage.url}
+                routerDirection="none"
+                lines="none"
+                detail={false}
+              >
+                <IonIcon
+                  slot="start"
+                  ios={logoutPage.iosIcon}
+                  md={logoutPage.mdIcon}
+                />
+                <IonLabel>{logoutPage.title}</IonLabel>
+              </IonItem>
+            </IonMenuToggle>
+          ) : (
+            ""
+          )}
         </IonList>
       </IonContent>
     </IonMenu>

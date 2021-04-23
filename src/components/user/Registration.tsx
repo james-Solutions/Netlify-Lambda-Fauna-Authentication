@@ -19,6 +19,7 @@ import {
   IonItemDivider,
   IonToast,
   IonProgressBar,
+  IonText,
 } from "@ionic/react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -27,6 +28,7 @@ import {
   getSendingRegistration,
   getRegistrationErrorMessage,
 } from "../../redux/slices/userSlice";
+import * as constants from "../../constants";
 
 export const Registration: React.FC = () => {
   const dispatch = useDispatch();
@@ -342,18 +344,24 @@ export const Registration: React.FC = () => {
               <IonCardTitle>Registration Request Successful</IonCardTitle>
             </IonCardHeader>
             <IonCardContent>
-              <IonItem>
-                <IonLabel>You must now verify your email account.</IonLabel>
-                <IonLabel>
-                  An email will be sent with a one time code that lasts 24 hours
-                  to complete your verification.
-                </IonLabel>
-                <IonLabel>
-                  Once you have verified your account via email, which you
-                  should receive soon, and your account has been approved. Then
-                  you will be able to login.
-                </IonLabel>
-              </IonItem>
+              <IonText style={{ display: "block" }}>
+                You must now verify your email account.
+              </IonText>
+              <br />
+              <IonText style={{ display: "block" }}>
+                An email will be sent with a one time code that lasts 24 hours
+                to complete your verification. Then you will be able to login.
+              </IonText>
+              <br />
+              {selected !== constants.USER.ACCESS_LEVELS.STUDENT ? (
+                <IonText style={{ display: "block" }}>
+                  You have requested a {selected} account. This requires
+                  approval and verification. You will be notified via email upon
+                  your approval or rejection.
+                </IonText>
+              ) : (
+                ""
+              )}
             </IonCardContent>
           </IonCard>
         </IonContent>

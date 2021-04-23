@@ -2,12 +2,15 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunk, RootState } from "../store/store";
 import fetch from "cross-fetch";
 import {
+  approvalError,
   LoggedInUser,
   LoginRequestUser,
   RegistrationRequest,
+  userApprovalUpdate,
   VerifyUser,
 } from "../interfaces/interfaces";
 import * as constants from "../../constants";
+import { faunaUser } from "../../components/user/Interfaces";
 const cookie = require("react-cookies");
 
 let apiUrl = "/.netlify/functions";
@@ -17,6 +20,7 @@ if (process.env.REACT_APP_DEV === "true") {
 }
 
 const cookieUserInfo = cookie.load("user-info");
+let unapprovedUsers: faunaUser[] = [];
 
 const initialState = {
   isAuth: cookieUserInfo !== undefined ? true : false,
@@ -37,6 +41,10 @@ const initialState = {
   verificationError: false,
   verificationErrorMessage: "",
   verificationSending: false,
+  unapprovedUsers,
+  fetchingUsers: false,
+  fetchingUsersErrorMessage: "",
+  updateUsers: false,
 };
 
 // Redux Slice
@@ -111,6 +119,39 @@ const userSlice = createSlice({
     setVerificationMessage: (state, action: PayloadAction<string>) => {
       state.verificationErrorMessage = action.payload;
     },
+    setFetchingUsers: (state) => {
+      state.fetchingUsers = true;
+    },
+    fetchUsersSuccessful: (state, action: PayloadAction<Array<faunaUser>>) => {
+      state.unapprovedUsers = action.payload;
+      state.fetchingUsersErrorMessage = "";
+      state.fetchingUsers = false;
+      state.updateUsers = false;
+    },
+    fetchUsersFailure: (state, action: PayloadAction<string>) => {
+      state.fetchingUsersErrorMessage = action.payload;
+      state.fetchingUsers = false;
+    },
+    updateUserApprovalFailure: (
+      state,
+      action: PayloadAction<approvalError>
+    ) => {
+      state.unapprovedUsers[action.payload.index].errorMessage =
+        action.payload.errorMessage;
+      state.unapprovedUsers[action.payload.index].updating = false;
+    },
+    setUserUpdating: (state, action: PayloadAction<userApprovalUpdate>) => {
+      state.unapprovedUsers[action.payload.index].updating = true;
+      state.unapprovedUsers[action.payload.index].approved =
+        action.payload.approved;
+    },
+    updateUnapprovedUserSuccess: (
+      state,
+      action: PayloadAction<userApprovalUpdate>
+    ) => {
+      state.unapprovedUsers[action.payload.index].updating = false;
+      state.updateUsers = true;
+    },
   },
 });
 
@@ -128,11 +169,19 @@ export const {
   setVerificationFailure,
   setVerificationSending,
   setVerificationMessage,
+  setFetchingUsers,
+  fetchUsersSuccessful,
+  fetchUsersFailure,
+  setUserUpdating,
+  updateUnapprovedUserSuccess,
+  updateUserApprovalFailure,
 } = userSlice.actions;
 
 // Selectors
 export const getIsAuth = (state: RootState) => state.user.isAuth;
 export const getUser = (state: RootState) => state.user.user;
+export const getUserAccessLevel = (state: RootState) =>
+  state.user.user.accessLevel;
 export const getRegistrationSuccess = (state: RootState) =>
   state.user.registrationSuccess;
 export const getSendingRegistration = (state: RootState) =>
@@ -153,6 +202,12 @@ export const getVerificationErrorMessage = (state: RootState) =>
   state.user.verificationErrorMessage;
 export const getVerificationSending = (state: RootState) =>
   state.user.verificationSending;
+export const getUnapprovedUsers = (state: RootState) =>
+  state.user.unapprovedUsers;
+export const getFetchingUsers = (state: RootState) => state.user.fetchingUsers;
+export const getUpdateUsers = (state: RootState) => state.user.updateUsers;
+export const getFetchUsersErrorMessage = (state: RootState) =>
+  state.user.fetchingUsersErrorMessage;
 
 export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   dispatch
@@ -174,7 +229,7 @@ export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   }).then(
     (res) => {
       res.json().then((response) => {
-        if (response.message === constants.STATUS.SUCCESS) {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
           dispatch(registrationSuccessful());
         } else {
           dispatch(registrationFailure(response.description));
@@ -207,7 +262,7 @@ export const loginRequest = (user: LoginRequestUser): AppThunk => (
       res
         .json()
         .then((response) => {
-          if (response.message === constants.STATUS.SUCCESS) {
+          if (response.message === constants.SERVER.STATUS.SUCCESS) {
             dispatch(
               loginSuccessful({
                 email: user.email,
@@ -241,10 +296,6 @@ export const logOutUser = (): AppThunk => (dispatch) => {
     (resRaw) => {
       resRaw.json().then((response) => {
         dispatch(logOutSuccessful());
-        if (response.message === constants.STATUS.SUCCESS) {
-        } else {
-          console.log("Could not logout");
-        }
       });
     },
     (error) => {
@@ -268,10 +319,11 @@ export const fetchVerificationCode = (user: VerifyUser): AppThunk => (
   }).then(
     (resRaw) => {
       resRaw.json().then((response) => {
-        if (response.message === constants.STATUS.SUCCESS) {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
           dispatch(setVerificationCode(response.code));
           if (
-            response.description === constants.USER_ERRORS.NO_CODE_UNVERIFIED
+            response.description ===
+            constants.USER.USER_ERRORS.NO_CODE_UNVERIFIED
           ) {
             dispatch(setVerificationMessage(response.description));
           }
@@ -304,7 +356,7 @@ export const verifyVerificationCode = (user: {
   }).then(
     (resRaw) => {
       resRaw.json().then((response) => {
-        if (response.message === constants.STATUS.SUCCESS) {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
           dispatch(setVerificationSuccess());
         } else {
           dispatch(setVerificationFailure(response.description));
@@ -313,6 +365,77 @@ export const verifyVerificationCode = (user: {
     },
     (error) => {
       dispatch(setVerificationFailure(error));
+    }
+  );
+};
+
+export const fetchUsers = (type: string): AppThunk => (dispatch) => {
+  dispatch(setFetchingUsers());
+  // Fetch
+  fetch(`${apiUrl}/approve`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      type,
+    }),
+  }).then(
+    (resRaw) => {
+      resRaw.json().then((response) => {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
+          // Success
+          dispatch(fetchUsersSuccessful(response.users));
+        } else {
+          // Failure
+          dispatch(fetchUsersFailure(response.description));
+        }
+      });
+    },
+    (error) => {
+      dispatch(fetchUsersFailure(error));
+    }
+  );
+};
+
+export const setUserApproval = (
+  user: faunaUser,
+  approvalUpdate: userApprovalUpdate
+): AppThunk => (dispatch) => {
+  // Dispatch that we are sending
+  dispatch(setUserUpdating(approvalUpdate));
+  fetch(`${apiUrl}/approve`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: user.email,
+      approved: approvalUpdate.approved,
+    }),
+  }).then(
+    (resRaw) => {
+      resRaw.json().then((response) => {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
+          dispatch(updateUnapprovedUserSuccess(approvalUpdate));
+        } else {
+          // Failure
+          dispatch(
+            updateUserApprovalFailure({
+              index: approvalUpdate.index,
+              errorMessage: response.description,
+            })
+          );
+        }
+      });
+    },
+    (error) => {
+      dispatch(
+        updateUserApprovalFailure({
+          index: approvalUpdate.index,
+          errorMessage: error,
+        })
+      );
     }
   );
 };
