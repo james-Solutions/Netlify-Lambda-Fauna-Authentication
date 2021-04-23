@@ -7,4 +7,4 @@ npm install
 
 Starting requires 2 environment variables:
 
-REACT_APP_DEV=true REACT_APP_FAUNA_KEY="your secret" npm start
+REACT_APP_FAUNA_SECRET=secret REACT_APP_SPARKPOST=secret npm start
