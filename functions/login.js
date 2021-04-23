@@ -21,28 +21,28 @@ exports.handler = (event, context, callback) => {
         if (response.verified === false) {
           return callback(null, {
             statusCode: 200,
-            headers: constants.HEADERS,
+            headers: constants.SERVER.HEADERS,
             body: JSON.stringify({
-              message: constants.STATUS.FAILURE,
-              description: constants.USER_ERRORS.USER_NOT_VERIFIED,
+              message: constants.SERVER.STATUS.FAILURE,
+              description: constants.USER.USER_ERRORS.USER_NOT_VERIFIED,
             }),
           });
         } else if (response.approved === false && response.rejected === true) {
           return callback(null, {
             statusCode: 200,
-            headers: constants.HEADERS,
+            headers: constants.SERVER.HEADERS,
             body: JSON.stringify({
-              message: constants.STATUS.FAILURE,
-              description: constants.USER_ERRORS.REJECTED_USER,
+              message: constants.SERVER.STATUS.FAILURE,
+              description: constants.USER.USER_ERRORS.REJECTED_USER,
             }),
           });
         } else if (response.approved === false) {
           return callback(null, {
             statusCode: 200,
-            headers: constants.HEADERS,
+            headers: constants.SERVER.HEADERS,
             body: JSON.stringify({
-              message: constants.STATUS.FAILURE,
-              description: constants.USER_ERRORS.USER_NOT_APPROVED,
+              message: constants.SERVER.STATUS.FAILURE,
+              description: constants.USER.USER_ERRORS.USER_NOT_APPROVED,
             }),
           });
         } else {
@@ -57,9 +57,9 @@ exports.handler = (event, context, callback) => {
                 .then((user) => {
                   return callback(null, {
                     statusCode: 200,
-                    headers: constants.HEADERS,
+                    headers: constants.SERVER.HEADERS,
                     body: JSON.stringify({
-                      message: constants.STATUS.SUCCESS,
+                      message: constants.SERVER.STATUS.SUCCESS,
                       secret: response.secret,
                       username: user.username,
                       accessLevel: user.accessLevel,
@@ -69,9 +69,9 @@ exports.handler = (event, context, callback) => {
                 .catch((error) => {
                   return callback(null, {
                     statusCode: 200,
-                    headers: constants.HEADERS,
+                    headers: constants.SERVER.HEADERS,
                     body: JSON.stringify({
-                      message: constants.STATUS.FAILURE,
+                      message: constants.SERVER.STATUS.FAILURE,
                       description: error.description,
                     }),
                   });
@@ -80,9 +80,9 @@ exports.handler = (event, context, callback) => {
             .catch((error) => {
               return callback(null, {
                 statusCode: 200,
-                headers: constants.HEADERS,
+                headers: constants.SERVER.HEADERS,
                 body: JSON.stringify({
-                  message: constants.STATUS.FAILURE,
+                  message: constants.SERVER.STATUS.FAILURE,
                   description: error.description,
                 }),
               });
@@ -92,9 +92,9 @@ exports.handler = (event, context, callback) => {
       .catch((error) => {
         return callback(null, {
           statusCode: 200,
-          headers: constants.HEADERS,
+          headers: constants.SERVER.HEADERS,
           body: JSON.stringify({
-            message: constants.STATUS.FAILURE,
+            message: constants.SERVER.STATUS.FAILURE,
             description: error,
           }),
         });
@@ -106,29 +106,29 @@ exports.handler = (event, context, callback) => {
         if (response === false) {
           return callback(null, {
             statusCode: 200,
-            headers: constants.HEADERS,
-            body: JSON.stringify({ message: constants.STATUS.SUCCESS }),
+            headers: constants.SERVER.HEADERS,
+            body: JSON.stringify({ message: constants.SERVER.STATUS.SUCCESS }),
           });
         } else {
           return callback(null, {
             statusCode: 200,
-            headers: constants.HEADERS,
-            body: JSON.stringify({ message: constants.STATUS.FAILURE }),
+            headers: constants.SERVER.HEADERS,
+            body: JSON.stringify({ message: constants.SERVER.STATUS.FAILURE }),
           });
         }
       })
       .catch((error) => {
         return callback(null, {
           statusCode: 200,
-          headers: constants.HEADERS,
-          body: JSON.stringify({ message: constants.STATUS.FAILURE }),
+          headers: constants.SERVER.HEADERS,
+          body: JSON.stringify({ message: constants.SERVER.STATUS.FAILURE }),
         });
       });
   } else {
     return callback(null, {
       statusCode: 200,
-      headers: constants.HEADERS,
-      body: JSON.stringify({ message: constants.STATUS.ALIVE }),
+      headers: constants.SERVER.HEADERS,
+      body: JSON.stringify({ message: constants.SERVER.STATUS.ALIVE }),
     });
   }
 };

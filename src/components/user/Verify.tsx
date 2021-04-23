@@ -113,7 +113,7 @@ export const Verify: React.FC<Props> = (props: Props) => {
                 <IonCardContent>
                   <IonItem>
                     <IonLabel color="danger">
-                      {constants.USER_ERRORS.CODE_DOES_NOT_MATCH}
+                      {constants.USER.USER_ERRORS.CODE_DOES_NOT_MATCH}
                     </IonLabel>
                   </IonItem>
                 </IonCardContent>

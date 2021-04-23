@@ -172,7 +172,8 @@ const Menu: React.FC = () => {
                   </IonMenuToggle>
                 );
               })}
-          {isAuth === true && user.accessLevel === constants.ACCESS_LEVELS.ROOT
+          {isAuth === true &&
+          user.accessLevel === constants.USER.ACCESS_LEVELS.ROOT
             ? RootAppPages.map((appPage, index) => {
                 return (
                   <IonMenuToggle key={index} autoHide={false}>
@@ -197,8 +198,8 @@ const Menu: React.FC = () => {
               })
             : ""}
           {isAuth === true &&
-          (user.accessLevel === constants.ACCESS_LEVELS.ADMIN ||
-            user.accessLevel === constants.ACCESS_LEVELS.ROOT)
+          (user.accessLevel === constants.USER.ACCESS_LEVELS.ADMIN ||
+            user.accessLevel === constants.USER.ACCESS_LEVELS.ROOT)
             ? AdminRootAppPages.map((appPage, index) => {
                 return (
                   <IonMenuToggle key={index} autoHide={false}>

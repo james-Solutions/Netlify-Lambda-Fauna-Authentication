@@ -353,7 +353,7 @@ export const Registration: React.FC = () => {
                 to complete your verification. Then you will be able to login.
               </IonText>
               <br />
-              {selected !== constants.ACCESS_LEVELS.STUDENT ? (
+              {selected !== constants.USER.ACCESS_LEVELS.STUDENT ? (
                 <IonText style={{ display: "block" }}>
                   You have requested a {selected} account. This requires
                   approval and verification. You will be notified via email upon

@@ -1,4 +1,4 @@
-export interface unapprovedUser {
+export interface faunaUser {
   email: string;
   username: string;
   accessLevel: string;
@@ -6,4 +6,5 @@ export interface unapprovedUser {
   approved: boolean;
   updating: boolean;
   errorMessage: string;
+  rejected: boolean;
 }

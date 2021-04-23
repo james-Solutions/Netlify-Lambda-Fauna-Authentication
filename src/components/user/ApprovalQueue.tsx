@@ -17,221 +17,37 @@ import {
   IonCol,
   IonTabs,
   IonTab,
+  IonTabBar,
+  IonTabButton,
+  IonIcon,
+  IonLabel,
+  IonRouterOutlet,
+  IonItem,
+  IonList,
+  IonSelect,
+  IonSelectOption,
 } from "@ionic/react";
-import { useDispatch, useSelector } from "react-redux";
-import { Redirect } from "react-router-dom";
-import {
-  fetchUnapprovedUsers,
-  getUnapprovedUsers,
-  getFetchingUnapprovedUsers,
-  setUserApproval,
-  getUpdateUnapprovedUsers,
-  getUnapprovedUsersErrorMessage,
-  getUserAccessLevel,
-} from "../../redux/slices/userSlice";
+import { Redirect, Route } from "react-router-dom";
 import * as constants from "../../constants";
+import { PendingUsers } from "./ApprovalQueue/PendingUsers";
+import { RejectedUsers } from "./ApprovalQueue/RejectedUsers";
+import { ApprovedUsers } from "./ApprovalQueue/ApprovedUsers";
+import { calendar } from "ionicons/icons";
+import { getUserAccessLevel } from "../../redux/slices/userSlice";
+import { useSelector } from "react-redux";
 
-export const ApprovalQueue: React.FC = () => {
-  const dispatch = useDispatch();
-  const [finishedLoading, setFinishedLoading] = useState<boolean>(false);
-  useEffect(() => {
-    dispatch(fetchUnapprovedUsers());
-    setFinishedLoading(true);
-  }, []);
-  const TextContainerStyle = {
-    display: "block",
-  };
+interface TabsProps {}
 
-  const fetchingUnapprovedUsers = useSelector(getFetchingUnapprovedUsers);
-  const queueErrorMessage = useSelector(getUnapprovedUsersErrorMessage);
-  const updateUsers = useSelector(getUpdateUnapprovedUsers);
-  const unapprovedUsers = useSelector(getUnapprovedUsers);
+export const ApprovalQueue: React.FC<TabsProps> = () => {
   const userAccessLevel = useSelector(getUserAccessLevel);
+  const [queueSelected, setQueueSelected] = useState<string>("pending");
+  useEffect(() => {
+    setQueueSelected("pending");
+  }, []);
 
-  if (updateUsers === true) {
-    dispatch(fetchUnapprovedUsers());
-  }
-
-  const approveBtnHandler = (index: number) => {
-    dispatch(
-      setUserApproval(unapprovedUsers[index], { index: index, approved: true })
-    );
-  };
-
-  const rejectBtnHandler = (index: number) => {
-    dispatch(
-      setUserApproval(unapprovedUsers[index], { index: index, approved: false })
-    );
-  };
-
-  if (userAccessLevel !== constants.ACCESS_LEVELS.ROOT) {
+  if (userAccessLevel !== constants.USER.ACCESS_LEVELS.ROOT) {
     return <Redirect to="/" />;
-  } else if (
-    finishedLoading &&
-    userAccessLevel === constants.ACCESS_LEVELS.ROOT
-  ) {
-    return (
-      <IonPage>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>User Approval Queue</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          {/* <IonTabs>
-                <IonRouterOutlet>
-                  <Redirect exact path="/tabs" to="/tabs/schedule" />
-                  Using the render method prop cuts down the number of renders your components will have due to route changes.
-                  Use the component prop when your component depends on the RouterComponentProps passed in automatically.
-                  
-                  <Route path="/tabs/schedule" render={() => <SchedulePage />} exact={true} />
-                  <Route path="/tabs/speakers" render={() => <SpeakerList />} exact={true} />
-                  <Route path="/tabs/speakers/:id" component={SpeakerDetail} exact={true} />
-                  <Route path="/tabs/schedule/:id" component={SessionDetail} />
-                  <Route path="/tabs/speakers/sessions/:id" component={SessionDetail} />
-                  <Route path="/tabs/map" render={() => <MapView />} exact={true} />
-                  <Route path="/tabs/about" render={() => <About />} exact={true} />
-                </IonRouterOutlet>
-                <IonTabBar slot="bottom">
-                  <IonTabButton tab="schedule" href="/tabs/schedule">
-                    <IonIcon icon={calendar} />
-                    <IonLabel>Schedule</IonLabel>
-                  </IonTabButton>
-                  <IonTabButton tab="speakers" href="/tabs/speakers">
-                    <IonIcon icon={people} />
-                    <IonLabel>Speakers</IonLabel>
-                  </IonTabButton>
-                  <IonTabButton tab="map" href="/tabs/map">
-                    <IonIcon icon={location} />
-                    <IonLabel>Map</IonLabel>
-                  </IonTabButton>
-                  <IonTabButton tab="about" href="/tabs/about">
-                  <IonIcon icon={informationCircle} />
-                  <IonLabel>About</IonLabel>
-                    </IonTabButton>
-                </IonTabBar>
-              </IonTabs> */}
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>Users pending approval</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              {queueErrorMessage ? (
-                <IonText color="danger">
-                  <b>Error:</b> {queueErrorMessage}
-                </IonText>
-              ) : (
-                ""
-              )}
-              {fetchingUnapprovedUsers === true ? (
-                <div>
-                  <IonText>Fetching Users</IonText>
-                  <IonProgressBar type="indeterminate"></IonProgressBar>
-                </div>
-              ) : (
-                ""
-              )}
-              <IonGrid>
-                <IonRow>
-                  {unapprovedUsers.length > 0
-                    ? unapprovedUsers.map((unvUser, index) => {
-                        return (
-                          <IonCol key={index} size={"4"}>
-                            <IonCard>
-                              <IonCardHeader>
-                                <IonCardTitle>
-                                  Email: {unvUser.email}
-                                </IonCardTitle>
-                              </IonCardHeader>
-                              <IonCardContent>
-                                <IonText style={TextContainerStyle}>
-                                  <b>Username:</b> {unvUser.username}
-                                </IonText>
-                                <br />
-                                <IonText style={TextContainerStyle}>
-                                  <b>Requested Access Level:</b>{" "}
-                                  {unvUser.accessLevel}
-                                </IonText>
-                                <br />
-                                {unvUser.verified === true ? (
-                                  <IonText
-                                    style={TextContainerStyle}
-                                    color="success"
-                                  >
-                                    <b>Email Verified</b>
-                                  </IonText>
-                                ) : (
-                                  <IonText
-                                    style={TextContainerStyle}
-                                    color="danger"
-                                  >
-                                    <b>Email Unverified</b>
-                                  </IonText>
-                                )}
-                                <hr style={{ border: "1px solid grey" }} />
-                                <IonRow className="ion-align-items-center">
-                                  {unvUser.errorMessage ? (
-                                    <IonCol className="ion-align-self-center">
-                                      <IonText color="danger">
-                                        {unvUser.errorMessage}
-                                      </IonText>
-                                    </IonCol>
-                                  ) : (
-                                    ""
-                                  )}
-                                  {unvUser.updating ? (
-                                    <IonCol className="ion-align-self-center">
-                                      <IonText color="secondary">
-                                        Updating User Approval
-                                      </IonText>
-                                      <IonProgressBar type="indeterminate"></IonProgressBar>
-                                    </IonCol>
-                                  ) : (
-                                    ""
-                                  )}
-                                </IonRow>
-                                <IonRow className="ion-align-items-center">
-                                  <IonCol className="ion-align-self-center">
-                                    <IonButton
-                                      type="submit"
-                                      color="danger"
-                                      disabled={unvUser.updating}
-                                      onClick={(event: any) => {
-                                        event.preventDefault();
-                                        rejectBtnHandler(index);
-                                      }}
-                                    >
-                                      Reject
-                                    </IonButton>
-                                  </IonCol>
-                                  <IonCol className="ion-align-self-center">
-                                    <IonButton
-                                      type="submit"
-                                      color="success"
-                                      disabled={unvUser.updating}
-                                      onClick={(event: any) => {
-                                        event.preventDefault();
-                                        approveBtnHandler(index);
-                                      }}
-                                    >
-                                      Approve
-                                    </IonButton>
-                                  </IonCol>
-                                </IonRow>
-                              </IonCardContent>
-                            </IonCard>
-                          </IonCol>
-                        );
-                      })
-                    : ""}
-                </IonRow>
-              </IonGrid>
-            </IonCardContent>
-          </IonCard>
-        </IonContent>
-      </IonPage>
-    );
-  } else if (userAccessLevel === constants.ACCESS_LEVELS.ROOT) {
+  } else if (userAccessLevel === constants.USER.ACCESS_LEVELS.ROOT) {
     return (
       <IonPage>
         <IonHeader>
@@ -241,14 +57,33 @@ export const ApprovalQueue: React.FC = () => {
         </IonHeader>
         <IonContent>
           <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>Users pending approval</IonCardTitle>
-            </IonCardHeader>
             <IonCardContent>
-              <IonText>Fetching Users</IonText>
-              <IonProgressBar type="indeterminate"></IonProgressBar>
+              <IonList>
+                <IonItem>
+                  <IonLabel>Queue</IonLabel>
+                  <IonSelect
+                    interface="popover"
+                    onIonChange={(event) =>
+                      setQueueSelected(event.detail.value)
+                    }
+                  >
+                    <IonSelectOption defaultChecked={true} value="pending">
+                      Pending Users
+                    </IonSelectOption>
+                    <IonSelectOption value="rejected">
+                      Rejected Users
+                    </IonSelectOption>
+                    <IonSelectOption value="all">
+                      All Approved Users
+                    </IonSelectOption>
+                  </IonSelect>
+                </IonItem>
+              </IonList>
             </IonCardContent>
           </IonCard>
+          {queueSelected === "pending" ? <PendingUsers /> : ""}
+          {queueSelected === "rejected" ? <RejectedUsers /> : ""}
+          {queueSelected === "all" ? <ApprovedUsers /> : ""}
         </IonContent>
       </IonPage>
     );
@@ -274,3 +109,41 @@ export const ApprovalQueue: React.FC = () => {
     );
   }
 };
+{
+  /* <IonTabs>
+  <IonRouterOutlet>
+    <Redirect exact path="/approve" to="/approve/pending" />
+        Using the render method prop cuts down the number of renders your
+        components will have due to route changes. Use the component prop
+        when your component depends on the RouterComponentProps passed in
+        automatically. 
+    <Route
+      path="/approve/pending"
+      // render={() => <PendingUsers />}
+      component={PendingUsers}
+      exact={true}
+    />
+    <Route
+      path="/approve/rejected"
+      // render={() => <RejectedUsers />}
+      component={RejectedUsers}
+      exact={true}
+    />
+    <Route path="/approve/all" render={() => <AllUsers />} exact={true} />
+  </IonRouterOutlet>
+  <IonTabBar slot="top">
+    <IonTabButton tab="pending" href="/approve/pending">
+      <IonIcon icon={calendar} />
+      <IonLabel>Pending Users</IonLabel>
+    </IonTabButton>
+    <IonTabButton tab="rejected" href="/approve/rejected">
+      <IonIcon icon={calendar} />
+      <IonLabel>Rejected Users</IonLabel>
+    </IonTabButton>
+    <IonTabButton tab="all" href="/approve/all">
+      <IonIcon icon={calendar} />
+      <IonLabel>All Approved Users</IonLabel>
+    </IonTabButton>
+  </IonTabBar>
+</IonTabs> */
+}

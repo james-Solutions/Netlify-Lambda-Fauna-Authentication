@@ -18,20 +18,22 @@ exports.handler = (event, context, callback) => {
             // Send Email
             sendVerifyCode(userData, code)
               .then((response) => {
-                if (response === constants.STATUS.SUCCESS) {
+                if (response === constants.SERVER.STATUS.SUCCESS) {
                   return callback(null, {
                     statusCode: 200,
-                    headers: constants.HEADERS,
-                    body: JSON.stringify({ message: constants.STATUS.SUCCESS }),
+                    headers: constants.SERVER.HEADERS,
+                    body: JSON.stringify({
+                      message: constants.SERVER.STATUS.SUCCESS,
+                    }),
                   });
                 }
               })
               .catch((error) => {
                 return callback(null, {
                   statusCode: 200,
-                  headers: constants.HEADERS,
+                  headers: constants.SERVER.HEADERS,
                   body: JSON.stringify({
-                    message: constants.STATUS.FAILURE,
+                    message: constants.SERVER.STATUS.FAILURE,
                     description: error,
                   }),
                 });
@@ -40,9 +42,9 @@ exports.handler = (event, context, callback) => {
           .catch((error) => {
             return callback(null, {
               statusCode: 200,
-              headers: constants.HEADERS,
+              headers: constants.SERVER.HEADERS,
               body: JSON.stringify({
-                message: constants.STATUS.FAILURE,
+                message: constants.SERVER.STATUS.FAILURE,
                 description: error,
               }),
             });
@@ -50,21 +52,21 @@ exports.handler = (event, context, callback) => {
       })
       .catch((error) => {
         console.error(error);
-        if (error.description === constants.FAUNA_ERRORS.NOT_UNIQUE) {
+        if (error.description === constants.SERVER.FAUNA_ERRORS.NOT_UNIQUE) {
           return callback(null, {
             statusCode: 200,
-            headers: constants.HEADERS,
+            headers: constants.SERVER.HEADERS,
             body: JSON.stringify({
-              message: constants.STATUS.FAILURE,
-              description: constants.USER_ERRORS.USER_NOT_UNIQUE,
+              message: constants.SERVER.STATUS.FAILURE,
+              description: constants.USER.USER_ERRORS.USER_NOT_UNIQUE,
             }),
           });
         } else {
           return callback(null, {
             statusCode: 200,
-            headers: constants.HEADERS,
+            headers: constants.SERVER.HEADERS,
             body: JSON.stringify({
-              message: constants.STATUS.FAILURE,
+              message: constants.SERVER.STATUS.FAILURE,
               description: error.description,
             }),
           });
@@ -73,8 +75,8 @@ exports.handler = (event, context, callback) => {
   } else {
     return callback(null, {
       statusCode: 200,
-      headers: constants.HEADERS,
-      body: JSON.stringify({ message: constants.STATUS.ALIVE }),
+      headers: constants.SERVER.HEADERS,
+      body: JSON.stringify({ message: constants.SERVER.STATUS.ALIVE }),
     });
   }
 };

@@ -26,7 +26,7 @@ export function createUser(userData) {
         accessLevel: userData.accessLevel,
         verified: false,
         approved:
-          userData.accessLevel === constants.ACCESS_LEVELS.STUDENT
+          userData.accessLevel === constants.USER.ACCESS_LEVELS.STUDENT
             ? true
             : false,
         rejected: false,
@@ -69,7 +69,7 @@ export async function deleteUserCode(email) {
         )
       )
       .then((response) => {
-        resolve(constants.STATUS.SUCCESS);
+        resolve(constants.SERVER.STATUS.SUCCESS);
       })
 
       .catch((error) => {
@@ -100,7 +100,7 @@ export async function getUserVerificationCode(email) {
       })
       .then(() => {
         if (response === undefined) {
-          reject(constants.USER_ERRORS.NO_CODE);
+          reject(constants.USER.USER_ERRORS.NO_CODE);
         } else {
           resolve(response);
         }
@@ -131,7 +131,7 @@ export async function updateUserVerification(email) {
         )
       )
       .then((response) => {
-        resolve(constants.STATUS.SUCCESS);
+        resolve(constants.SERVER.STATUS.SUCCESS);
       })
 
       .catch((error) => {
@@ -163,7 +163,7 @@ export async function updateUserApproval(email, approved) {
         )
       )
       .then((response) => {
-        resolve(constants.STATUS.SUCCESS);
+        resolve(constants.SERVER.STATUS.SUCCESS);
       })
 
       .catch((error) => {
@@ -197,7 +197,7 @@ export async function getUserVerifyApprove(email) {
           response.approved = page[0].data.approved;
           response.rejected = page[0].data.rejected;
         } else {
-          reject(constants.USER_ERRORS.USER_DOES_NOT_EXIST);
+          reject(constants.USER.USER_ERRORS.USER_DOES_NOT_EXIST);
         }
       })
       .then(() => {
@@ -236,7 +236,7 @@ export async function getUserData(email) {
           response.verified = page[0].data.verified;
           response.approved = page[0].data.approved;
         } else {
-          reject(constants.USER_ERRORS.USER_DOES_NOT_EXIST);
+          reject(constants.USER.USER_ERRORS.USER_DOES_NOT_EXIST);
         }
       })
       .then(() => {
@@ -275,7 +275,7 @@ export async function sendVerifyCode(userData, code) {
                   <html>
                     <body>
                       <p>Thank you for signing up for the Student Scheduler Planner (SSP).</p>
-                      <p>Please <a href=${constants.URL.DOMAIN}/user/verify/${userData.email}>click me</a> to verify your email.</p>
+                      <p>Please <a href=${constants.SERVER.URL.DOMAIN}/user/verify/${userData.email}>click me</a> to verify your email.</p>
                       <p>Use code the following code to complete your verification: <span style="color:red">${code}</span></p>
                       <p>Once your account has been verified and approved, you will be able to login.</p>
                     </body>
@@ -284,7 +284,7 @@ export async function sendVerifyCode(userData, code) {
         recipients: [{ address: userData.email }],
       })
       .then((data) => {
-        resolve(constants.STATUS.SUCCESS);
+        resolve(constants.SERVER.STATUS.SUCCESS);
       })
       .catch((error) => {
         reject(error);
@@ -311,7 +311,7 @@ export async function sendApprovalUpdateEmail(email, approved) {
                     <body>
                       <p>Thank you for signing up for the Student Scheduler Planner (SSP).</p>
                       <p>Your Account has been approved. If you are verified as well, you may now login at the link below.</p>
-                      <a href=${constants.URL.DOMAIN}/user/login>Login Here</a>
+                      <a href=${constants.SERVER.URL.DOMAIN}/user/login>Login Here</a>
                     </body>
                   </html>`
             : `
@@ -325,7 +325,7 @@ export async function sendApprovalUpdateEmail(email, approved) {
         recipients: [{ address: email }],
       })
       .then((data) => {
-        resolve(constants.STATUS.SUCCESS);
+        resolve(constants.SERVER.STATUS.SUCCESS);
       })
       .catch((error) => {
         reject(error);
@@ -342,7 +342,7 @@ export function generateCode() {
 }
 
 /**
- * getUnapprovedUsers - Returns all
+ * getUnapprovedUsers - Returns all users that are unapproved and not rejected
  * @returns {Array<unapprovedUser>} Array of Objects, where each is a user account of the Interface unapprovedUser
  */
 export async function getUnapprovedUsers() {
@@ -361,7 +361,67 @@ export async function getUnapprovedUsers() {
             response.push(page[i].data);
           }
         } else {
-          reject(constants.USER_ERRORS.NO_UNAPPROVED_USERS);
+          reject(constants.USER.USER_ERRORS.NO_UNAPPROVED_USERS);
+        }
+      })
+      .then(() => {
+        resolve(response);
+      })
+      .catch((error) => reject(error.description));
+  });
+}
+
+/**
+ * getRejectedUsers - Returns all rejected users
+ * @returns {Array<unapprovedUser>} Array of Objects, where each is a user account of the Interface unapprovedUser
+ */
+export async function getRejectedUsers() {
+  return new Promise((resolve, reject) => {
+    let helper = clientFauna.paginate(
+      query.Match(query.Index("users_rejected"), true)
+    );
+    const response = [];
+    helper
+      .map((ref) => {
+        return query.Get(ref);
+      })
+      .each((page) => {
+        if (page.length > 0) {
+          for (let i = 0; i < page.length; i++) {
+            response.push(page[i].data);
+          }
+        } else {
+          reject(constants.USER.USER_ERRORS.NO_UNAPPROVED_USERS);
+        }
+      })
+      .then(() => {
+        resolve(response);
+      })
+      .catch((error) => reject(error.description));
+  });
+}
+
+/**
+ * getAllApprovedUsers - Returns all approved members
+ * @returns {Array<unapprovedUser>} Array of Objects, where each is a user account of the Interface unapprovedUser
+ */
+export async function getAllApprovedUsers() {
+  return new Promise((resolve, reject) => {
+    let helper = clientFauna.paginate(
+      query.Match(query.Index("users_approved"), true)
+    );
+    const response = [];
+    helper
+      .map((ref) => {
+        return query.Get(ref);
+      })
+      .each((page) => {
+        if (page.length > 0) {
+          for (let i = 0; i < page.length; i++) {
+            response.push(page[i].data);
+          }
+        } else {
+          reject(constants.USER.USER_ERRORS.NO_UNAPPROVED_USERS);
         }
       })
       .then(() => {

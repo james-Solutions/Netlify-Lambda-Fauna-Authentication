@@ -10,7 +10,7 @@ import {
   VerifyUser,
 } from "../interfaces/interfaces";
 import * as constants from "../../constants";
-import { unapprovedUser } from "../../components/user/Interfaces";
+import { faunaUser } from "../../components/user/Interfaces";
 const cookie = require("react-cookies");
 
 let apiUrl = "/.netlify/functions";
@@ -20,7 +20,7 @@ if (process.env.REACT_APP_DEV === "true") {
 }
 
 const cookieUserInfo = cookie.load("user-info");
-let unapprovedUsers: unapprovedUser[] = [];
+let unapprovedUsers: faunaUser[] = [];
 
 const initialState = {
   isAuth: cookieUserInfo !== undefined ? true : false,
@@ -42,9 +42,9 @@ const initialState = {
   verificationErrorMessage: "",
   verificationSending: false,
   unapprovedUsers,
-  fetchingUnapprovedUsers: false,
-  fetchingUnapprovedUsersErrorMessage: "",
-  updateUnapprovedUsers: false,
+  fetchingUsers: false,
+  fetchingUsersErrorMessage: "",
+  updateUsers: false,
 };
 
 // Redux Slice
@@ -119,20 +119,18 @@ const userSlice = createSlice({
     setVerificationMessage: (state, action: PayloadAction<string>) => {
       state.verificationErrorMessage = action.payload;
     },
-    setFetchingUnapprovedUsers: (state) => {
-      state.fetchingUnapprovedUsers = true;
+    setFetchingUsers: (state) => {
+      state.fetchingUsers = true;
     },
-    unapprovedUsersSuccessful: (
-      state,
-      action: PayloadAction<Array<unapprovedUser>>
-    ) => {
+    fetchUsersSuccessful: (state, action: PayloadAction<Array<faunaUser>>) => {
       state.unapprovedUsers = action.payload;
-      state.fetchingUnapprovedUsers = false;
-      state.updateUnapprovedUsers = false;
+      state.fetchingUsersErrorMessage = "";
+      state.fetchingUsers = false;
+      state.updateUsers = false;
     },
-    unapprovedUsersFailure: (state, action: PayloadAction<string>) => {
-      state.fetchingUnapprovedUsersErrorMessage = action.payload;
-      state.fetchingUnapprovedUsers = false;
+    fetchUsersFailure: (state, action: PayloadAction<string>) => {
+      state.fetchingUsersErrorMessage = action.payload;
+      state.fetchingUsers = false;
     },
     updateUserApprovalFailure: (
       state,
@@ -142,10 +140,7 @@ const userSlice = createSlice({
         action.payload.errorMessage;
       state.unapprovedUsers[action.payload.index].updating = false;
     },
-    setUnapprovedUserUpdating: (
-      state,
-      action: PayloadAction<userApprovalUpdate>
-    ) => {
+    setUserUpdating: (state, action: PayloadAction<userApprovalUpdate>) => {
       state.unapprovedUsers[action.payload.index].updating = true;
       state.unapprovedUsers[action.payload.index].approved =
         action.payload.approved;
@@ -155,7 +150,7 @@ const userSlice = createSlice({
       action: PayloadAction<userApprovalUpdate>
     ) => {
       state.unapprovedUsers[action.payload.index].updating = false;
-      state.updateUnapprovedUsers = true;
+      state.updateUsers = true;
     },
   },
 });
@@ -174,10 +169,10 @@ export const {
   setVerificationFailure,
   setVerificationSending,
   setVerificationMessage,
-  setFetchingUnapprovedUsers,
-  unapprovedUsersSuccessful,
-  unapprovedUsersFailure,
-  setUnapprovedUserUpdating,
+  setFetchingUsers,
+  fetchUsersSuccessful,
+  fetchUsersFailure,
+  setUserUpdating,
   updateUnapprovedUserSuccess,
   updateUserApprovalFailure,
 } = userSlice.actions;
@@ -209,12 +204,10 @@ export const getVerificationSending = (state: RootState) =>
   state.user.verificationSending;
 export const getUnapprovedUsers = (state: RootState) =>
   state.user.unapprovedUsers;
-export const getFetchingUnapprovedUsers = (state: RootState) =>
-  state.user.fetchingUnapprovedUsers;
-export const getUpdateUnapprovedUsers = (state: RootState) =>
-  state.user.updateUnapprovedUsers;
-export const getUnapprovedUsersErrorMessage = (state: RootState) =>
-  state.user.fetchingUnapprovedUsersErrorMessage;
+export const getFetchingUsers = (state: RootState) => state.user.fetchingUsers;
+export const getUpdateUsers = (state: RootState) => state.user.updateUsers;
+export const getFetchUsersErrorMessage = (state: RootState) =>
+  state.user.fetchingUsersErrorMessage;
 
 export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   dispatch
@@ -236,7 +229,7 @@ export const registrationRequest = (user: RegistrationRequest): AppThunk => (
   }).then(
     (res) => {
       res.json().then((response) => {
-        if (response.message === constants.STATUS.SUCCESS) {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
           dispatch(registrationSuccessful());
         } else {
           dispatch(registrationFailure(response.description));
@@ -269,7 +262,7 @@ export const loginRequest = (user: LoginRequestUser): AppThunk => (
       res
         .json()
         .then((response) => {
-          if (response.message === constants.STATUS.SUCCESS) {
+          if (response.message === constants.SERVER.STATUS.SUCCESS) {
             dispatch(
               loginSuccessful({
                 email: user.email,
@@ -303,7 +296,7 @@ export const logOutUser = (): AppThunk => (dispatch) => {
     (resRaw) => {
       resRaw.json().then((response) => {
         dispatch(logOutSuccessful());
-        if (response.message === constants.STATUS.SUCCESS) {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
         } else {
           console.log("Could not logout");
         }
@@ -330,10 +323,11 @@ export const fetchVerificationCode = (user: VerifyUser): AppThunk => (
   }).then(
     (resRaw) => {
       resRaw.json().then((response) => {
-        if (response.message === constants.STATUS.SUCCESS) {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
           dispatch(setVerificationCode(response.code));
           if (
-            response.description === constants.USER_ERRORS.NO_CODE_UNVERIFIED
+            response.description ===
+            constants.USER.USER_ERRORS.NO_CODE_UNVERIFIED
           ) {
             dispatch(setVerificationMessage(response.description));
           }
@@ -366,7 +360,7 @@ export const verifyVerificationCode = (user: {
   }).then(
     (resRaw) => {
       resRaw.json().then((response) => {
-        if (response.message === constants.STATUS.SUCCESS) {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
           dispatch(setVerificationSuccess());
         } else {
           dispatch(setVerificationFailure(response.description));
@@ -379,23 +373,26 @@ export const verifyVerificationCode = (user: {
   );
 };
 
-export const fetchUnapprovedUsers = (): AppThunk => (dispatch) => {
-  dispatch(setFetchingUnapprovedUsers());
+export const fetchUsers = (type: string): AppThunk => (dispatch) => {
+  dispatch(setFetchingUsers());
   // Fetch
   fetch(`${apiUrl}/approve`, {
-    method: "GET",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({
+      type,
+    }),
   }).then(
     (resRaw) => {
       resRaw.json().then((response) => {
-        if (response.message === constants.STATUS.SUCCESS) {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
           // Success
-          dispatch(unapprovedUsersSuccessful(response.users));
+          dispatch(fetchUsersSuccessful(response.users));
         } else {
           // Failure
-          dispatch(unapprovedUsersFailure(response.description));
+          dispatch(fetchUsersFailure(response.description));
         }
       });
     },
@@ -406,11 +403,11 @@ export const fetchUnapprovedUsers = (): AppThunk => (dispatch) => {
 };
 
 export const setUserApproval = (
-  user: unapprovedUser,
+  user: faunaUser,
   approvalUpdate: userApprovalUpdate
 ): AppThunk => (dispatch) => {
   // Dispatch that we are sending
-  dispatch(setUnapprovedUserUpdating(approvalUpdate));
+  dispatch(setUserUpdating(approvalUpdate));
   fetch(`${apiUrl}/approve`, {
     method: "POST",
     headers: {
@@ -423,7 +420,7 @@ export const setUserApproval = (
   }).then(
     (resRaw) => {
       resRaw.json().then((response) => {
-        if (response.message === constants.STATUS.SUCCESS) {
+        if (response.message === constants.SERVER.STATUS.SUCCESS) {
           dispatch(updateUnapprovedUserSuccess(approvalUpdate));
         } else {
           // Failure

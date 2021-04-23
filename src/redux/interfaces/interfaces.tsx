@@ -24,6 +24,7 @@ export interface VerifyUser {
 export interface userApprovalUpdate {
   index: number;
   approved: boolean;
+  rejected: boolean;
 }
 
 export interface approvalError {
