@@ -296,10 +296,6 @@ export const logOutUser = (): AppThunk => (dispatch) => {
     (resRaw) => {
       resRaw.json().then((response) => {
         dispatch(logOutSuccessful());
-        if (response.message === constants.SERVER.STATUS.SUCCESS) {
-        } else {
-          console.log("Could not logout");
-        }
       });
     },
     (error) => {
@@ -397,7 +393,7 @@ export const fetchUsers = (type: string): AppThunk => (dispatch) => {
       });
     },
     (error) => {
-      console.log(error);
+      dispatch(fetchUsersFailure(error));
     }
   );
 };
@@ -434,7 +430,6 @@ export const setUserApproval = (
       });
     },
     (error) => {
-      console.log(error);
       dispatch(
         updateUserApprovalFailure({
           index: approvalUpdate.index,
